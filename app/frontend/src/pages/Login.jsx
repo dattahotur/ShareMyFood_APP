@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Notification from '../components/Notification';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [notification, setNotification] = useState({ message: '', type: '' });
