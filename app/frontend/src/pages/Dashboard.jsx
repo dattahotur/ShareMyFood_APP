@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 import VerifiedBadge from '../components/VerifiedBadge';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Dashboard = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -23,10 +25,10 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const [ordersRes, allOrdersRes, recipesRes, userRes] = await Promise.all([
-          fetch(`/api/orders/user/${user.id || user._id}`),
-          fetch('/api/orders'),
-          fetch('/api/recipes'),
-          fetch(`/api/users/${user.id || user._id}`)
+          fetch(`${API_URL}/api/orders/user/${user.id || user._id}`),
+          fetch(`${API_URL}/api/orders`),
+          fetch(`${API_URL}/api/recipes`),
+          fetch(`${API_URL}/api/users/${user.id || user._id}`)
         ]);
         const ordersData = await ordersRes.json();
         const allOrdersData = await allOrdersRes.json();
@@ -93,7 +95,7 @@ const Dashboard = () => {
   const handleAction = async (orderId, status) => {
     try {
       const endpoint = status === 'approved' ? 'approve' : 'reject';
-      const res = await fetch(`/api/orders/${orderId}/${endpoint}`, {
+      const res = await fetch(`${API_URL}/api/orders/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -132,7 +134,7 @@ const Dashboard = () => {
   const handleDismissWarning = async () => {
     if (!currentUser?.id) return;
     try {
-      const res = await fetch(`/api/users/${currentUser.id}/clear-warnings`, {
+      const res = await fetch(`${API_URL}/api/users/${currentUser.id}/clear-warnings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
