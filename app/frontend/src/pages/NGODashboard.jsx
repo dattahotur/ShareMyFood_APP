@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 import VerifiedBadge from '../components/VerifiedBadge';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const NGODashboard = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -22,7 +24,7 @@ const NGODashboard = () => {
         setLoading(true);
         const [orderRes, recipesRes, userRes] = await Promise.all([
           fetch(`/api/orders/user/${user.id || user._id}`),
-          fetch('/api/recipes'),
+          fetch(`${API_URL}/api/recipes`),
           fetch(`/api/users/${user.id || user._id}`)
         ]);
         const orders = await orderRes.json();

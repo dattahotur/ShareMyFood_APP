@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const roles = [
   { value: 'user', label: 'Regular User', desc: 'Claim surplus food', purpose: 'Ideal for individuals looking to buy surplus food from local restaurants and grocers at a discount. Save money and help prevent food waste.', icon: 'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 1 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z', color: '#10b981' },
@@ -29,7 +30,7 @@ const Register = () => {
     }
     try {
       const { confirmPassword, ...registerPayload } = formData;
-      const res = await fetch('/api/users/register', {
+      const res = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerPayload)

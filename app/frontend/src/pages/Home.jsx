@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import VerifiedBadge from '../components/VerifiedBadge';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,7 +14,7 @@ const Home = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch('/api/recipes');
+        const res = await fetch(`${API_URL}/api/recipes`);
         if (res.ok) { const data = await res.json(); setRecipes(data); }
       } catch (error) { console.error("Failed to fetch recipes", error); }
     };

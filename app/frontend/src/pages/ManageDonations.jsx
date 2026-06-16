@@ -4,6 +4,8 @@ import axios from 'axios';
 import Notification from '../components/Notification';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ManageDonations = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -27,7 +29,7 @@ const ManageDonations = () => {
 
     const fetchRecipes = async () => {
       try {
-        const recipesRes = await fetch('/api/recipes');
+        const recipesRes = await fetch(`${API_URL}/api/recipes`);
         const recipesData = await recipesRes.json();
         const recipeMap = {};
         recipesData.forEach(r => { 
@@ -44,7 +46,7 @@ const ManageDonations = () => {
 
     const fetchOrders = async (myRecipeIds) => {
       try {
-        const ordersRes = await fetch('/api/orders');
+        const ordersRes = await fetch(`${API_URL}/api/orders`);
         const ordersData = await ordersRes.json();
         if (isMounted) {
           const filtered = ordersData.filter(o => myRecipeIds.includes(o.recipeId));

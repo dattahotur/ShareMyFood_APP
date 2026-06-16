@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const VerificationRequest = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -30,7 +32,7 @@ const VerificationRequest = () => {
     if (!verificationPhoto) { setNotification({ message: 'Please upload a photo of your documents.', type: 'error' }); return; }
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/users/verify', {
+      const res = await fetch(`${API_URL}/api/users/verify`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userId: user.id || user._id, 

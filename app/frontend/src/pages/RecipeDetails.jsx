@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
 import VerifiedBadge from '../components/VerifiedBadge';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const RecipeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ const RecipeDetails = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/orders', {
+      const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userId: user.id || user._id, 

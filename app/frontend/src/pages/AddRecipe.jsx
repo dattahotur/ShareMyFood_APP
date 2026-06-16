@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AddRecipe = () => {
   useNavigationGuard();
   const navigate = useNavigate();
@@ -69,7 +71,7 @@ const AddRecipe = () => {
     }
 
     try {
-      const res = await fetch('/api/recipes/', {
+      const res = await fetch(`${API_URL}/api/recipes/`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData, 

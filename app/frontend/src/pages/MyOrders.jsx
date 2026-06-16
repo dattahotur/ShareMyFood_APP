@@ -4,6 +4,8 @@ import axios from 'axios';
 import Notification from '../components/Notification';
 import useNavigationGuard from '../hooks/useNavigationGuard';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const MyOrders = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -32,7 +34,7 @@ const MyOrders = () => {
 
     const fetchRecipes = async () => {
       try {
-        const recipeRes = await fetch('/api/recipes');
+        const recipeRes = await fetch(`${API_URL}/api/recipes`);
         const recipeData = await recipeRes.json();
         const recipeMap = {};
         recipeData.forEach(r => recipeMap[r.id || r._id] = r);

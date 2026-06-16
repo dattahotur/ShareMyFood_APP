@@ -6,6 +6,8 @@ import VerifiedBadge from '../components/VerifiedBadge';
 
 const tabs = ['Reports', 'Verification', 'Analytics', 'Users'];
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AdminPortal = () => {
   const navigate = useNavigate();
   useNavigationGuard();
@@ -26,7 +28,7 @@ const AdminPortal = () => {
       try {
         setLoading(true);
         const [ordRes, usrRes, recRes] = await Promise.all([
-          fetch('/api/orders'), fetch('/api/users'), fetch('/api/recipes')
+          fetch(`${API_URL}/api/orders`),fetch(`${API_URL}/api/users`),fetch(`${API_URL}/api/recipes`)
         ]);
         const ordData = await ordRes.json();
         const usrData = await usrRes.json();
