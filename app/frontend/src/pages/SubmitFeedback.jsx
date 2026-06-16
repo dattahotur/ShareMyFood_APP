@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Notification from '../components/Notification';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const SubmitFeedback = () => {
     const { orderId } = useParams();
     const navigate = useNavigate();

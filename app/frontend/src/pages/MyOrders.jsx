@@ -46,7 +46,7 @@ const MyOrders = () => {
 
     const fetchOrdersData = async () => {
       try {
-        const res = await fetch(`/api/orders/user/${user.id || user._id}`);
+        const res = await fetch(`${API_URL}/api/orders/user/${user.id || user._id}`);
         const data = await res.json();
         if (isMounted) setOrders(data);
       } catch (err) {
@@ -84,7 +84,7 @@ const MyOrders = () => {
     
     setIsSubmittingReport(true);
     try {
-      const res = await fetch(`/api/orders/${showReportModal}/report`, {
+      const res = await fetch(`${API_URL}/api/orders/${showReportModal}/report`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           reason: reportDescription,

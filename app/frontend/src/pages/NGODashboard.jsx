@@ -23,9 +23,9 @@ const NGODashboard = () => {
       try {
         setLoading(true);
         const [orderRes, recipesRes, userRes] = await Promise.all([
-          fetch(`/api/orders/user/${user.id || user._id}`),
+          fetch(`${API_URL}/api/orders/user/${user.id || user._id}`),
           fetch(`${API_URL}/api/recipes`),
-          fetch(`/api/users/${user.id || user._id}`)
+          fetch(`${API_URL}/api/users/${user.id || user._id}`)
         ]);
         const orders = await orderRes.json();
         const recipes = await recipesRes.json();
@@ -56,7 +56,7 @@ const NGODashboard = () => {
   const handleDismissWarning = async () => {
     if (!currentUser?.id) return;
     try {
-      const res = await fetch(`/api/users/${currentUser.id}/clear-warnings`, {
+      const res = await fetch(`${API_URL}/api/users/${currentUser.id}/clear-warnings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

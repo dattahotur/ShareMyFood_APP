@@ -90,7 +90,7 @@ const ManageDonations = () => {
 
   const handleAction = async (orderId, action) => {
     try {
-      const res = await fetch(`/api/orders/${orderId}/${action}`, { method: 'POST' });
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/${action}`, { method: 'POST' });
       if (res.ok) {
         setNotification({ message: `Order ${action}d`, type: 'success' });
         setOrders(prev => prev.map(o => (o._id === orderId || o.id === orderId) ? { ...o, status: action === 'approve' ? 'approved' : 'rejected' } : o));

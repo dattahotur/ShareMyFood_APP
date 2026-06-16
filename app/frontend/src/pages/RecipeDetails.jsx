@@ -29,12 +29,12 @@ const RecipeDetails = () => {
     const fetchRecipe = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/recipes/${id}`);
+        const res = await fetch(`${API_URL}/api/recipes/${id}`);
         if (res.ok) {
           const data = await res.json();
           setRecipe(data);
           if (data.restaurantId) {
-            const uRes = await fetch(`/api/users/${data.restaurantId}`);
+            const uRes = await fetch(`${API_URL}/api/users/${data.restaurantId}`);
             if (uRes.ok) { const u = await uRes.json(); setDonorName(u.name); }
           }
         } else { showNotification('Recipe not found', 'error'); }
@@ -89,7 +89,7 @@ const RecipeDetails = () => {
       if (res.ok) {
         showNotification(`You reserved ${quantity} ${recipe.title}! The donor will confirm shortly.`, 'success');
         setShowConfirm(false);
-        const updated = await fetch(`/api/recipes/${id}`);
+        const updated = await fetch(`${API_URL}/api/recipes/${id}`);
         if (updated.ok) setRecipe(await updated.json());
       } else {
         const d = await res.json();

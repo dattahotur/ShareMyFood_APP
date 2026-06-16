@@ -45,7 +45,7 @@ const AdminPortal = () => {
 
   const handleVerify = async (userId) => {
     try {
-      const res = await fetch(`/api/users/${userId}/verify`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verificationStatus: 'verified' }) });
+      const res = await fetch(`${API_URL}/api/users/${userId}/verify`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verificationStatus: 'verified' }) });
       if (res.ok) {
         setNotification({ message: 'Partner verified!', type: 'success' });
         setUsers(prev => prev.map(u => u.id === userId || u._id === userId ? { ...u, verificationStatus: 'verified' } : u));
@@ -55,7 +55,7 @@ const AdminPortal = () => {
 
   const handleRejectVerification = async (userId) => {
     try {
-      const res = await fetch(`/api/users/${userId}/verify`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verificationStatus: 'rejected' }) });
+      const res = await fetch(`${API_URL}/api/users/${userId}/verify`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verificationStatus: 'rejected' }) });
       if (res.ok) {
         setNotification({ message: 'Verification rejected.', type: 'info' });
         setUsers(prev => prev.map(u => u.id === userId || u._id === userId ? { ...u, verificationStatus: 'rejected' } : u));
@@ -71,7 +71,7 @@ const AdminPortal = () => {
     const userId = confirmDeleteUser;
     if (!userId) return;
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/users/${userId}`, { method: 'DELETE' });
       if (res.ok) {
         setNotification({ message: 'User deleted.', type: 'success' });
         setUsers(prev => prev.filter(u => (u.id || u._id) !== userId));
@@ -98,7 +98,7 @@ const AdminPortal = () => {
     
     try {
       if (type === 'restrict') {
-        fetch(`/api/users/${donorId}`, { method: 'DELETE' }); // Background fire-and-forget
+        fetch(`${API_URL}/api/users/${donorId}`, { method: 'DELETE' }); // Background fire-and-forget
       } else {
         const donor = users.find(u => String(u.id || u._id) === String(donorId));
         fetch('http://localhost:5001/warn-rider-final', {
@@ -115,7 +115,7 @@ const AdminPortal = () => {
         });
       }
       // Resolve the report in order service
-      fetch(`/api/orders/${rId}/resolve`, { method: 'PUT' });
+      fetch(`${API_URL}/api/orders/${id}/resolve`, { method: 'PUT' });
       setNotification({ message: 'Action processed.', type: 'success' });
     } catch (err) {
       console.error(err);
@@ -128,7 +128,7 @@ const AdminPortal = () => {
     setReports(prev => prev.filter(r => (r._id || r.id) !== orderId));
     
     try {
-      const res = await fetch(`/api/orders/${orderId}/resolve`, { method: 'PUT' });
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/resolve`, { method: 'PUT' });
       if (res.ok) {
         setNotification({ message: 'Report resolved.', type: 'success' });
       }
