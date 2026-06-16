@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = 5005;
+const PORT = process.env.PORT || 5005;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/foodwaste_delivery';
 
 mongoose.connect(MONGO_URI)
