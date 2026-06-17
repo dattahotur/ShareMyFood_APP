@@ -101,7 +101,7 @@ const AdminPortal = () => {
         fetch(`${API_URL}/api/users/${donorId}`, { method: 'DELETE' }); // Background fire-and-forget
       } else {
         const donor = users.find(u => String(u.id || u._id) === String(donorId));
-        fetch('http://localhost:5001/warn-rider-final', {
+        fetch('https://notification-service-t1t1.onrender.com', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -115,7 +115,7 @@ const AdminPortal = () => {
         });
       }
       // Resolve the report in order service
-      fetch(`${API_URL}/api/orders/${id}/resolve`, { method: 'PUT' });
+      fetch(`${API_URL}/api/orders/${rId}/resolve`, { method: 'PUT' });
       setNotification({ message: 'Action processed.', type: 'success' });
     } catch (err) {
       console.error(err);
