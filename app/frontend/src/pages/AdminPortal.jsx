@@ -148,20 +148,14 @@ const AdminPortal = () => {
   };
 
   const handleRestrictClick = (r) => {
-    const recipe = recipes.find(rc => String(rc.id || rc._id) === String(r.recipeId));
-    const donorId = r.donorId || recipe?.donorId;
-    if (!donorId) { 
-      setShowManualAction({ report: r, type: 'restrict' });
-      return; 
-    }
-    const donor = users.find(u => String(u.id || u._id) === String(donorId));
-    setConfirmRestrict({ report: r, donor });
+    setConfirmRestrict(r);
   };
 
   const executeRestrict = async () => {
     if (!confirmRestrict) return;
-    const { report, donor } = confirmRestrict;
-    const donorId = donor?.id || donor?._id;
+    const report = confirmRestrict;
+    const recipe = recipes.find(rc => String(rc.id || rc._id) === String(report.recipeId));
+    const donorId = report.donorId || recipe?.donorId;
     const rId = report._id || report.id;
     
     // Optimistic UI update for reports
@@ -462,36 +456,17 @@ const AdminPortal = () => {
       {/* Confirm Restrict Modal */}
       {confirmRestrict && (
         <div className="app-modal-overlay">
-          <div className="app-modal-card" style={{ textAlign: 'center', maxWidth: '460px' }}>
+          <div className="app-modal-card" style={{ textAlign: 'center' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#ef4444" style={{width:'28px',height:'28px'}}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9.14c-.05.92-.78 1.66-1.7 1.66H11.3c-.92 0-1.65-.74-1.7-1.66L9.26 9m9.96-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
               </svg>
             </div>
-            <h3 style={{ margin: '0 0 0.5rem', fontFamily: "'Outfit', sans-serif", fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>Restrict Donor & Resolve</h3>
-            <p style={{ color: '#64748b', margin: '0 0 1rem', lineHeight: 1.5, fontSize: '0.92rem' }}>
-              Are you sure you want to restrict this donor and resolve the report? This will permanently delete the account.
+            <h3 style={{ margin: '0 0 0.5rem', fontFamily: "'Outfit', sans-serif", fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>Confirm Account Restriction</h3>
+            <p style={{ color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5, fontSize: '0.92rem' }}>
+              Are you sure you want to permanently delete this account and resolve this report? This action cannot be undone.
             </p>
             
-            <div style={{ textAlign: 'left', background: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', margin: '1rem 0 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>User Name:</span>
-                <div style={{ fontSize: '0.92rem', color: '#334155', fontWeight: '600' }}>{confirmRestrict.donor?.name || 'Unknown'}</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>User Email:</span>
-                <div style={{ fontSize: '0.92rem', color: '#334155' }}>{confirmRestrict.donor?.email || 'Unknown'}</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>User Role:</span>
-                <div style={{ fontSize: '0.92rem', color: '#334155', textTransform: 'uppercase', fontWeight: '600' }}>{confirmRestrict.donor?.role || 'Unknown'}</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>Report Reason:</span>
-                <div style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.4' }}>{confirmRestrict.report?.reportReason || 'No details provided.'}</div>
-              </div>
-            </div>
-
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button onClick={() => setConfirmRestrict(null)} style={{
                 flex: 1, padding: '0.75rem', borderRadius: '0.85rem', border: '1px solid #e2e8f0',
@@ -502,7 +477,7 @@ const AdminPortal = () => {
                 background: 'linear-gradient(135deg, #ef4444, #dc2626)',
                 fontWeight: '700', color: 'white', cursor: 'pointer', fontFamily: 'inherit',
                 boxShadow: '0 6px 16px -3px rgba(239,68,68,0.3)'
-              }}>Delete Account & Resolve Report</button>
+              }}>Confirm Restriction</button>
             </div>
           </div>
         </div>
