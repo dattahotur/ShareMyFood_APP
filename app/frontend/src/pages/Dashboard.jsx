@@ -94,11 +94,15 @@ const Dashboard = () => {
 
   const handleAction = async (orderId, status) => {
     try {
-      const endpoint = status === 'approved' ? 'approve' : 'reject';
-      const res = await fetch(`${API_URL}/api/orders/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+     const endpoint = status === 'approved' ? 'approve' : 'reject';
+
+      const res = await fetch(
+        `${API_URL}/api/orders/${orderId}/${endpoint}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       if (res.ok) {
         // Find the order that was updated
         const updatedOrder = incomingRequests.find(o => (o._id === orderId || o.id === orderId));
