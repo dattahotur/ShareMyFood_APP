@@ -72,6 +72,10 @@ const RecipeDetails = () => {
 
     setIsSubmitting(true);
     try {
+      console.log("Recipe object:", recipe);
+      console.log("recipe._id =", recipe._id);
+      console.log("recipe.id =", recipe.id);
+
       const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

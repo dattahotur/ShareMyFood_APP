@@ -578,7 +578,7 @@ app.post('/', async (req, res) => {
     
     // STRICT ROLE & VERIFICATION CHECK
     try {
-      const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
+     const userServiceUrl = 'https://user-service-2fy7.onrender.com';
       const userRes = await axios.get(`${userServiceUrl}/${userId}`);
       const userData = userRes.data;
 
@@ -598,7 +598,7 @@ app.post('/', async (req, res) => {
     // Fetch recipe details to get the pickup address
     let pickupAddress = '';
     try {
-      const recipeServiceUrl = process.env.RECIPE_SERVICE_URL || 'http://recipe-service:5002';
+      const recipeServiceUrl = 'https://recipe-service-1g2k.onrender.com';
       const recipeRes = await axios.get(`${recipeServiceUrl}/${recipeId}`);
       pickupAddress = recipeRes.data.address || '';
       
