@@ -179,10 +179,12 @@ app.post('/:id/report', async (req, res) => {
     // Update donor report count in user-service
     try {
       const userServiceUrl = process.env.USER_SERVICE_URL;
-
+      console.log("USER_SERVICE_URL =", userServiceUrl);
+      console.log("DONOR_ID =", order.donorId);
       await axios.put(
         `${userServiceUrl}/${order.donorId}/report`
       );
+      console.log("REPORT COUNT UPDATED");
     } catch (err) {
       console.error(
         "Failed to update donor report count:",
