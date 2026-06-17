@@ -101,16 +101,15 @@ const AdminPortal = () => {
         fetch(`${API_URL}/api/users/${donorId}`, { method: 'DELETE' }); // Background fire-and-forget
       } else {
         const donor = users.find(u => String(u.id || u._id) === String(donorId));
-        fetch('https://notification-service-t1t1.onrender.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: donorId,
-            userName: donor?.name || 'Unknown User',
-            donorId: donorId,
-            reason: report.reportReason,
-            adminName: "Platform Admin",
-            orderId: rId
+                await fetch(`${API_URL}/api/users/warn-rider-final`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: donorId,
+                  donorId: donorId,
+                  reason: report.reportReason,
+                  adminName: "Platform Admin",
+                  orderId: rId
           })
         });
       }
