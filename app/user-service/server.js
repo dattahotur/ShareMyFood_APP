@@ -34,13 +34,17 @@ app.post('/warn-rider-final', async (req, res) => {
   user.warnings.push(warning);
 
   // 2. Resolve/Remove the report
-  if (user.reports) {
-    const cleanId = String(orderId || '').replace('#', '');
-    user.reports = user.reports.filter(r => {
-      const rCleanId = String(r.orderId || '').replace('#', '');
-      return rCleanId !== cleanId;
-    });
-  }
+if (user.reports) {
+  const cleanId = String(orderId || '').replace('#', '');
+
+  user.reports = user.reports.filter(r => {
+    const rCleanId = String(r.orderId || '').replace('#', '');
+    return rCleanId !== cleanId;
+  });
+
+  // Update report count
+  user.reportCount = user.reports.length;
+}
 
   saveUsers();
 
