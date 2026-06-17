@@ -175,8 +175,8 @@ const Home = () => {
               const isFreeSoon = currentUser.role === 'ngo' && timeLeft > 0 && timeLeft <= 30 * 60 * 1000;
 
               return (
-                <Link key={recipe.id} to={`/food/${recipe.id}`}
-                  className="hover-lift" data-testid={`food-card-${recipe.id}`}
+                <Link key={recipe._id || recipe.id} to={`/food/${recipe._id || recipe.id}`}
+                  className="hover-lift" data-testid={`food-card-${recipe._id || recipe.id}`}
                   style={{
                     background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
                     borderRadius: '1.25rem', overflow: 'hidden',

@@ -36,7 +36,7 @@ const NGODashboard = () => {
           localStorage.setItem('user', JSON.stringify(userData));
         }
         const recipeMap = {};
-        recipes.forEach(r => recipeMap[r.id] = r);
+       recipes.forEach(r => recipeMap[r._id || r.id] = r);
         let mealsRescued = 0;
         const enriched = [];
         orders.forEach(order => {

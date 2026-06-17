@@ -78,7 +78,7 @@ const RecipeDetails = () => {
           userId: user.id || user._id, 
           userName: user.name,
           donorId: recipe.donorId,
-          recipeId: recipe.id, 
+          recipeId: recipe._id || recipe.id, 
           quantity, 
           deliveryMethod, 
           deliveryAddress: deliveryMethod === 'delivery-partner' ? deliveryAddress : '',

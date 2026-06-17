@@ -21,7 +21,7 @@ const SubmitFeedback = () => {
         const fetchOrder = async () => {
             try {
                 console.log(`[FEEDBACK-PAGE] Fetching order details for ID: "${orderId}"`);
-                const url = `/api/orders/order-detail/${orderId}`;
+               const url = `${API_URL}/api/orders/order-detail/${orderId}`;
                 console.log(`[FEEDBACK-PAGE] Full URL: ${url}`);
                 const res = await axios.get(url);
                 setOrder(res.data);
@@ -53,7 +53,10 @@ const SubmitFeedback = () => {
             };
             console.log(`[FEEDBACK-PAGE] Payload:`, payload);
             
-            const res = await axios.post(`/api/users/${order.driverId}/feedback`, payload);
+            const res = await axios.post(
+                            `${API_URL}/api/users/${order.driverId}/feedback`,
+                            payload
+                        );
             console.log(`[FEEDBACK-PAGE] Success:`, res.data);
             
             setNotification({ message: 'Thank you for your feedback!', type: 'success' });

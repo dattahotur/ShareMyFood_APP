@@ -128,9 +128,12 @@ const MyOrders = () => {
       
       if (res.status === 200) {
         // Mark as reported/rated in order service too
-        await axios.post(`/api/orders/${order._id || order.id}/rider-report`, {
-          type: isRiderIssue ? 'reported' : 'rated'
-        });
+        await axios.post(
+          `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
+          {
+            type: isRiderIssue ? 'reported' : 'rated'
+          }
+        );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
         setOrders(prev => prev.map(o => (o._id === showRiderModal || o.id === showRiderModal) 
