@@ -97,6 +97,17 @@ const saveUsers = () => {
   }
 };
 
+app.param('id', (req, res, next, id) => {
+  if (req.path.endsWith('/restore')) {
+    return next();
+  }
+  const user = users.find(u => String(u.id) === String(id));
+  if (user && user.status === 'deleted') {
+    return res.status(403).json({ error: 'Account has been deleted' });
+  }
+  next();
+});
+
 // ULTRA-ROBUST: Submit a rating/report for a user (e.g. rider)
 // Matches any POST ending in 'rider-feedback' or 'feedback'
 app.post(/.*feedback$/, (req, res) => {
@@ -329,6 +340,9 @@ app.post('/verify', (req, res) => {
   const { userId, documents } = req.body;
   const user = users.find(u => String(u.id) === String(userId));
   if (!user) return res.status(404).json({ error: 'User not found' });
+  if (user.status === 'deleted') {
+    return res.status(403).json({ error: 'Account has been deleted' });
+  }
 
   user.verificationStatus = 'pending';
   user.verificationDocs = documents || []; // Array of { name, url: base64 }

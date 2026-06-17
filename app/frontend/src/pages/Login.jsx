@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Notification from '../components/Notification';
 
@@ -15,6 +15,14 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/';
+
+  useEffect(() => {
+    if (location.state?.message) {
+      showNotification(location.state.message, 'error');
+      // Clear location state message to prevent showing it again on reload
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

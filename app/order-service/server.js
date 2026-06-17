@@ -94,6 +94,21 @@ const orderSchema = new mongoose.Schema({
 
 const Order = mongoose.model('Order', orderSchema);
 
+const checkUserStatus = async (userId) => {
+  if (!userId) return;
+  const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
+  try {
+    const res = await axios.get(`${userServiceUrl}/${userId}`);
+    if (res.data && res.data.status === 'deleted') {
+      throw new Error('DELETED');
+    }
+  } catch (err) {
+    if (err.message === 'DELETED' || (err.response && (err.response.status === 403 || err.response.status === 404))) {
+      throw new Error('DELETED');
+    }
+  }
+};
+
 app.get('/health', (req, res) => res.json({ status: 'Order Service Alive' }));
 
 // Resolve a reported order
@@ -413,6 +428,17 @@ app.put('/:id/delivery-status', async (req, res) => {
     const { status, driverId } = req.body; // status: 'picked_up', 'delivered'
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const activeDriverId = driverId || order.driverId;
+    if (activeDriverId) {
+      try {
+        await checkUserStatus(activeDriverId);
+      } catch (err) {
+        if (err.message === 'DELETED') {
+          return res.status(403).json({ error: 'Unauthorized: Driver account is deleted.' });
+        }
+      }
+    }
     
     // Robust check for driver permission
     if (order.driverId && driverId && String(order.driverId) !== String(driverId)) {
@@ -512,6 +538,15 @@ app.post('/:id/approve', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    try {
+      await checkUserStatus(order.donorId);
+    } catch (err) {
+      if (err.message === 'DELETED') {
+        return res.status(403).json({ error: 'Unauthorized: Account is deleted.' });
+      }
+    }
+
     if (order.status !== 'pending') return res.status(400).json({ error: 'Order is not pending' });
     
     order.status = 'approved';
@@ -557,6 +592,15 @@ app.post('/:id/reject', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    try {
+      await checkUserStatus(order.donorId);
+    } catch (err) {
+      if (err.message === 'DELETED') {
+        return res.status(403).json({ error: 'Unauthorized: Account is deleted.' });
+      }
+    }
+
     if (order.status !== 'pending') return res.status(400).json({ error: 'Order is not pending' });
     
     order.status = 'rejected';
@@ -594,9 +638,18 @@ app.post('/', async (req, res) => {
     
     // STRICT ROLE & VERIFICATION CHECK
     try {
-     const userServiceUrl = 'https://user-service-2fy7.onrender.com';
+      const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
       const userRes = await axios.get(`${userServiceUrl}/${userId}`);
       const userData = userRes.data;
+
+      if (userData.status === 'deleted') {
+        return res.status(403).json({ error: 'Unauthorized: Account has been deleted' });
+      }
+
+      const donorRes = await axios.get(`${userServiceUrl}/${donorId}`);
+      if (donorRes.data && donorRes.data.status === 'deleted') {
+        return res.status(403).json({ error: 'Unauthorized: Donor account has been deleted' });
+      }
 
       if (userData.role === 'restaurant') {
         return res.status(403).json({ error: 'Unauthorized: Business Partners cannot claim food donations.' });
@@ -606,6 +659,9 @@ app.post('/', async (req, res) => {
         return res.status(403).json({ error: 'Verification Required: NGOs must be verified to claim food donations.' });
       }
     } catch (err) {
+      if (err.response && (err.response.status === 403 || err.response.status === 404)) {
+        return res.status(403).json({ error: 'Unauthorized: Account is deleted or inactive' });
+      }
       console.error('User verification check failed:', err.message);
       // If user-service is down, we fallback to a cautious approach
       if (claimerRole === 'restaurant') return res.status(403).json({ error: 'Unauthorized role.' });

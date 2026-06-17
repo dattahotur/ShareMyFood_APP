@@ -66,6 +66,18 @@ app.get('/available', async (req, res) => {
 // Get active delivery for a rider
 app.get('/active/:riderId', async (req, res) => {
   try {
+    const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
+    try {
+      const userRes = await axios.get(`${userServiceUrl}/${req.params.riderId}`);
+      if (userRes.data && userRes.data.status === 'deleted') {
+        return res.status(403).json({ error: 'Unauthorized: Rider account has been deleted' });
+      }
+    } catch (err) {
+      if (err.response && (err.response.status === 403 || err.response.status === 404)) {
+        return res.status(403).json({ error: 'Unauthorized: Rider account has been deleted' });
+      }
+    }
+
     const active = await Delivery.findOne({ 
       riderId: req.params.riderId, 
       status: { $in: ['waiting', 'picked_up'] } 
@@ -79,6 +91,21 @@ app.get('/active/:riderId', async (req, res) => {
 // Endpoint for Rider to accept a request (expected by ibm2)
 app.post('/:id/accept-delivery', async (req, res) => {
   try {
+    const driverId = req.body.driverId;
+    if (driverId) {
+      const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
+      try {
+        const userRes = await axios.get(`${userServiceUrl}/${driverId}`);
+        if (userRes.data && userRes.data.status === 'deleted') {
+          return res.status(403).json({ error: 'Unauthorized: Rider account has been deleted' });
+        }
+      } catch (err) {
+        if (err.response && (err.response.status === 403 || err.response.status === 404)) {
+          return res.status(403).json({ error: 'Unauthorized: Rider account has been deleted' });
+        }
+      }
+    }
+
     const delivery = await Delivery.findById(req.params.id);
     if (!delivery) return res.status(404).json({ error: 'Delivery request not found' });
     

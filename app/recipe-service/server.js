@@ -73,11 +73,28 @@ app.put('/:id/increment', (req, res) => {
   res.json({ message: 'Stock restored', recipe });
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   console.log('[RECIPE-SERVICE] Received listing request:', req.body);
-  const { donorRole } = req.body;
+  const { donorId, donorRole } = req.body;
   if (donorRole === 'ngo') {
     return res.status(403).json({ error: 'Unauthorized: NGOs cannot list food items.' });
+  }
+
+  // Verify donor status with user-service
+  const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
+  try {
+    const userRes = await fetch(`${userServiceUrl}/${donorId}`);
+    if (userRes.status === 403 || userRes.status === 404) {
+      return res.status(403).json({ error: 'Unauthorized: User account is deleted.' });
+    }
+    if (userRes.ok) {
+      const userData = await userRes.json();
+      if (userData.status === 'deleted') {
+        return res.status(403).json({ error: 'Unauthorized: User account is deleted.' });
+      }
+    }
+  } catch (err) {
+    console.error('Failed to verify user status in recipe-service:', err.message);
   }
 
   const newRecipe = { 

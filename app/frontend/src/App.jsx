@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -19,6 +19,48 @@ import SubmitFeedback from './pages/SubmitFeedback';
 
 import './App.css';
 
+const AuthChecker = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) return;
+      try {
+        const user = JSON.parse(storedUser);
+        const userId = user.id || user._id;
+        if (!userId) return;
+
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/users/${userId}`);
+        if (res.status === 403 || res.status === 404) {
+          handleForceLogout();
+          return;
+        }
+        if (res.ok) {
+          const latestUser = await res.json();
+          if (latestUser.status === 'deleted') {
+            handleForceLogout();
+          }
+        }
+      } catch (err) {
+        console.error("Failed to verify user status:", err);
+      }
+    };
+
+    const handleForceLogout = () => {
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth-change'));
+      navigate('/login', { state: { message: 'Your account has been removed by an administrator.' } });
+    };
+
+    checkUserStatus();
+  }, [location.pathname, navigate]);
+
+  return null;
+};
+
 function App() {
   const [initializing, setInitializing] = useState(true);
 
@@ -30,6 +72,7 @@ function App() {
     <Router>
       <div className="app-container">
         <ScrollToTop />
+        <AuthChecker />
         <Navbar />
         <main className="main-content">
           <Routes>
