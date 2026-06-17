@@ -112,6 +112,16 @@ const AdminPortal = () => {
                   orderId: rId
           })
         });
+        setUsers(prev => prev.map(u => {
+          if (String(u.id || u._id) === String(donorId)) {
+            const currentWarnings = u.warnings || [];
+            return {
+              ...u,
+              warnings: [...currentWarnings, { id: Date.now(), reason: report.reportReason }]
+            };
+          }
+          return u;
+        }));
       }
       // Resolve the report in order service
       fetch(`${API_URL}/api/orders/${rId}/resolve`, { method: 'PUT' });
@@ -320,7 +330,7 @@ const AdminPortal = () => {
           <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', fontFamily: 'inherit' }}>
             <thead>
               <tr style={{ background: '#f8fafc' }}>
-                {['Name', 'Email', 'Role', 'Verified', 'Reports Count', 'Actions'].map(h => (
+                {['Name', 'Email', 'Role', 'Verified', 'Warnings', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '1rem 1.25rem', textAlign: 'left', fontWeight: '700', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid #f1f5f9' }}>{h}</th>
                 ))}
               </tr>
@@ -348,8 +358,8 @@ const AdminPortal = () => {
                       <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>—</span>
                     )}
                   </td>
-                  <td style={{ padding: '0.85rem 1.25rem', fontWeight: '700', color: (u.reportCount || 0) > 0 ? '#ef4444' : '#64748b' }}>
-                    {u.reportCount || 0}
+                  <td style={{ padding: '0.85rem 1.25rem', fontWeight: '700', color: (u.warnings?.length || 0) > 0 ? '#ef4444' : '#64748b' }}>
+                    {u.warnings?.length || 0}
                   </td>
                   <td style={{ padding: '0.85rem 1.25rem' }}>
                     {u.role !== 'admin' && (
