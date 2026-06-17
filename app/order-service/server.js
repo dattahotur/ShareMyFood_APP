@@ -176,6 +176,20 @@ app.post('/:id/report', async (req, res) => {
     order.reportProofImage = req.body.proofImage || '';
     await order.save();
 
+    // Update donor report count in user-service
+    try {
+      const userServiceUrl = process.env.USER_SERVICE_URL;
+
+      await axios.put(
+        `${userServiceUrl}/${order.donorId}/report`
+      );
+    } catch (err) {
+      console.error(
+        "Failed to update donor report count:",
+        err.response?.data || err.message
+      );
+    }
+
     // Notify donor about the report
     try {
       const notificationServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:5004';
