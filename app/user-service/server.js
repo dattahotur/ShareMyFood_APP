@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -157,38 +158,57 @@ app.post(/.*feedback$/, (req, res) => {
 app.get('/health', (req, res) => res.json({ status: 'User Service Alive' }));
 
 // Get all users
-app.get('/', (req, res) => res.json(users.filter(u => u.status !== 'deleted')));
+app.get('/', (req, res) => {
+  res.json(users.filter(u => u.status !== 'deleted').map(({ password, ...u }) => u));
+});
 
 // Get all users (admin) — includes deleted
-app.get('/admin/all', (req, res) => res.json(users));
+app.get('/admin/all', (req, res) => {
+  res.json(users.map(({ password, ...u }) => u));
+});
 
 // Get single user by id
 app.get('/:id', (req, res) => {
   const user = users.find(u => String(u.id) === String(req.params.id));
-  if (user) return res.json(user);
+  if (user) {
+    const { password, ...safeUser } = user;
+    return res.json(safeUser);
+  }
   res.status(404).json({ error: 'User not found' });
 });
 
-app.post('/register', (req, res) => {
-  const newUser = {
-    id: users.length + 1,
-    ...req.body,
-    reportCount: 0,
-    status: "active",
-    verificationStatus: "none",
-    verificationDocs: [],
-    verificationAttempts: 0,
-    isOnline: false,
-    vehicleType: "",
-    vehicleNumber: "",
-    availableEarnings: 0,
-    ratings: [],
-    reports: [],
-    warnings: []
-  };
-  users.push(newUser);
-  saveUsers();
-  res.status(201).json({ message: 'User registered', user: newUser });
+app.post('/register', async (req, res) => {
+  try {
+    const { password } = req.body;
+    let hashedPassword = password;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+    const newUser = {
+      id: users.length + 1,
+      ...req.body,
+      password: hashedPassword,
+      reportCount: 0,
+      status: "active",
+      verificationStatus: "none",
+      verificationDocs: [],
+      verificationAttempts: 0,
+      isOnline: false,
+      vehicleType: "",
+      vehicleNumber: "",
+      availableEarnings: 0,
+      ratings: [],
+      reports: [],
+      warnings: []
+    };
+    users.push(newUser);
+    saveUsers();
+    const { password: pw, ...safeUser } = newUser;
+    res.status(201).json({ message: 'User registered', user: safeUser });
+  } catch (err) {
+    console.error('Registration error:', err);
+    res.status(500).json({ error: 'Server error during registration' });
+  }
 });
 
 
@@ -198,7 +218,8 @@ app.put('/:id/online-status', (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   user.isOnline = req.body.isOnline;
   saveUsers();
-  res.json({ message: 'Status updated', user });
+  const { password, ...safeUser } = user;
+  res.json({ message: 'Status updated', user: safeUser });
 });
 
 // Update vehicle details
@@ -208,20 +229,35 @@ app.put('/:id/vehicle', (req, res) => {
   user.vehicleType = req.body.vehicleType || user.vehicleType;
   user.vehicleNumber = req.body.vehicleNumber || user.vehicleNumber;
   saveUsers();
-  res.json({ message: 'Vehicle updated', user });
+  const { password, ...safeUser } = user;
+  res.json({ message: 'Vehicle updated', user: safeUser });
 });
 
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find(u => u.email === email && u.status !== 'deleted');
-  if (user) {
-    if (password !== user.password) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = users.find(u => u.email === email && u.status !== 'deleted');
+    if (user) {
+      let isMatch = false;
+      try {
+        isMatch = await bcrypt.compare(password, user.password);
+      } catch (err) {
+        // bcrypt.compare might throw if password is not a valid hash
+      }
+      if (!isMatch) {
+        isMatch = (password === user.password);
+      }
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      const { password: pw, ...safeUser } = user;
+      res.json({ message: 'Login successful', user: safeUser });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials or account deleted' });
     }
-    const { password: pw, ...safeUser } = user;
-    res.json({ message: 'Login successful', user: safeUser });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials or account deleted' });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error during login' });
   }
 });
 
@@ -250,7 +286,8 @@ app.post('/:id/add-earnings', (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   user.availableEarnings = (user.availableEarnings || 0) + Number(amount);
   saveUsers();
-  res.json({ message: 'Earnings added', user });
+  const { password: pw, ...safeUser } = user;
+  res.json({ message: 'Earnings added', user: safeUser });
 });
 
 
@@ -306,7 +343,8 @@ app.delete('/:id', (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   user.status = 'deleted';
   saveUsers();
-  res.json({ message: 'User account deleted', user });
+  const { password, ...safeUser } = user;
+  res.json({ message: 'User account deleted', user: safeUser });
 });
 
 // Restore user account (admin only)
@@ -316,7 +354,8 @@ app.put('/:id/restore', (req, res) => {
   user.status = 'active';
   user.reportCount = 0;
   saveUsers();
-  res.json({ message: 'User account restored', user });
+  const { password, ...safeUser } = user;
+  res.json({ message: 'User account restored', user: safeUser });
 });
 
 // Get platform stats
@@ -347,7 +386,8 @@ app.post('/verify', (req, res) => {
   user.verificationStatus = 'pending';
   user.verificationDocs = documents || []; // Array of { name, url: base64 }
   saveUsers();
-  res.json({ message: 'Verification requested', user });
+  const { password, ...safeUser } = user;
+  res.json({ message: 'Verification requested', user: safeUser });
 });
 
 // Admin: Update verification status (Frontend expected endpoint)
@@ -358,13 +398,14 @@ app.put('/:id/verify', (req, res) => {
 
   user.verificationStatus = verificationStatus;
   saveUsers();
-  res.json({ message: `User verification ${verificationStatus}`, user });
+  const { password, ...safeUser } = user;
+  res.json({ message: `User verification ${verificationStatus}`, user: safeUser });
 });
 
 // Admin: Get all verification requests
 app.get('/admin/verifications', (req, res) => {
   const requests = users.filter(u => u.verificationStatus === 'pending');
-  res.json(requests);
+  res.json(requests.map(({ password, ...u }) => u));
 });
 
 // Admin: Update verification status
@@ -375,7 +416,8 @@ app.put('/admin/verify/:id', (req, res) => {
 
   user.verificationStatus = status;
   saveUsers(); // Added saveUsers()
-  res.json({ message: `User verification ${status}`, user });
+  const { password, ...safeUser } = user;
+  res.json({ message: `User verification ${status}`, user: safeUser });
 });
 
 // Catch-all for debugging
