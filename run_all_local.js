@@ -81,7 +81,7 @@ const SERVICES = [
   },
   {
     name: 'delivery-partner-frontend',
-    dir: '../ibm2', // relative to c:\Users\ADMIN\OneDrive\Desktop\ibm
+    dir: '../DeliverMyFood',
     command: 'npm.cmd', // use npm.cmd on Windows
     args: ['run', 'dev'],
     env: {
@@ -90,7 +90,7 @@ const SERVICES = [
   },
   {
     name: 'delivery-partner-backend',
-    dir: '../ibm2/server',
+    dir: '../DeliverMyFood/server',
     command: 'node',
     args: ['user-service.js'],
     env: {

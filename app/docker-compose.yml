@@ -57,6 +57,9 @@ services:
       - ./notification-service:/usr/src/app
     environment:
       - PORT=5004
+      - MONGO_URI=mongodb://mongo:27017/foodwaste_notifications
+    depends_on:
+      - mongo
 
   delivery-service:
     build: ./delivery-service
