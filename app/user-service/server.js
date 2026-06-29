@@ -100,6 +100,21 @@ app.use((req, res, next) => {
   next();
 });
 
+const getUserQuery = (idParam) => {
+  if (mongoose.Types.ObjectId.isValid(idParam)) {
+    const num = Number(idParam);
+    if (!isNaN(num)) {
+      return { $or: [{ _id: idParam }, { id: num }] };
+    }
+    return { _id: idParam };
+  }
+  const numericId = Number(idParam);
+  if (!isNaN(numericId)) {
+    return { id: numericId };
+  }
+  return { id: idParam };
+};
+
 // Submit a warning/report resolution
 app.post('/warn-rider-final', async (req, res) => {
   const { targetUserId, userId, donorId, reason, adminName, orderId } = req.body;
@@ -107,7 +122,7 @@ app.post('/warn-rider-final', async (req, res) => {
   console.log(`[[FINAL-WARN-ACTION]] User: ${targetId}, Order: ${orderId}`);
   
   try {
-    const user = await User.findOne({ id: Number(targetId) });
+    const user = await User.findOne(getUserQuery(targetId));
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     // 1. Add Warning
@@ -162,7 +177,7 @@ app.param('id', async (req, res, next, id) => {
     return next();
   }
   try {
-    const user = await User.findOne({ id: Number(id) });
+    const user = await User.findOne(getUserQuery(id));
     if (user && user.status === 'deleted') {
       return res.status(403).json({ error: 'Account has been deleted' });
     }
@@ -187,7 +202,7 @@ app.post(/.*feedback$/, async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ id: Number(targetId) });
+    const user = await User.findOne(getUserQuery(targetId));
     if (!user) {
       console.error(`[USER-SERVICE-FEEDBACK] User ${targetId} not found`);
       return res.status(404).json({ error: 'User not found' });
@@ -252,7 +267,7 @@ app.get('/admin/all', async (req, res) => {
 
 app.get('/:id', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (user) {
       const obj = user.toObject();
       delete obj.password;
@@ -310,7 +325,7 @@ app.post('/register', async (req, res) => {
 
 app.put('/:id/online-status', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.isOnline = req.body.isOnline;
     await user.save();
@@ -324,7 +339,7 @@ app.put('/:id/online-status', async (req, res) => {
 
 app.put('/:id/vehicle', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.vehicleType = req.body.vehicleType || user.vehicleType;
     user.vehicleNumber = req.body.vehicleNumber || user.vehicleNumber;
@@ -366,7 +381,7 @@ app.post('/login', async (req, res) => {
 
 app.post('/:id/clear-warnings', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.warnings = [];
     user.markModified('warnings');
@@ -379,7 +394,7 @@ app.post('/:id/clear-warnings', async (req, res) => {
 
 app.put('/:id/report', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.reportCount = (user.reportCount || 0) + 1;
     await user.save();
@@ -392,7 +407,7 @@ app.put('/:id/report', async (req, res) => {
 app.post('/:id/add-earnings', async (req, res) => {
   try {
     const { amount } = req.body;
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.availableEarnings = (user.availableEarnings || 0) + Number(amount);
     await user.save();
@@ -424,7 +439,7 @@ app.get('/admin/all-reports', async (req, res) => {
 app.post('/:id/withdraw', async (req, res) => {
   try {
     const { amount } = req.body;
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     const withdrawAmount = amount ? Number(amount) : (user.availableEarnings || 0);
     if (withdrawAmount > (user.availableEarnings || 0)) {
@@ -449,7 +464,9 @@ app.post('/:id/withdraw', async (req, res) => {
 
 app.get('/:id/withdrawals', async (req, res) => {
   try {
-    const withdrawals = await Withdrawal.find({ userId: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const withdrawals = await Withdrawal.find({ userId: user.id });
     res.json(withdrawals);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -458,7 +475,7 @@ app.get('/:id/withdrawals', async (req, res) => {
 
 app.delete('/:id', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.status = 'deleted';
     await user.save();
@@ -472,7 +489,7 @@ app.delete('/:id', async (req, res) => {
 
 app.put('/:id/restore', async (req, res) => {
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
     user.status = 'active';
     user.reportCount = 0;
@@ -507,7 +524,7 @@ app.get('/admin/stats', async (req, res) => {
 app.post('/verify', async (req, res) => {
   const { userId, documents } = req.body;
   try {
-    const user = await User.findOne({ id: Number(userId) });
+    const user = await User.findOne(getUserQuery(userId));
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (user.status === 'deleted') {
       return res.status(403).json({ error: 'Account has been deleted' });
@@ -528,7 +545,7 @@ app.post('/verify', async (req, res) => {
 app.put('/:id/verify', async (req, res) => {
   const { verificationStatus } = req.body;
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     user.verificationStatus = verificationStatus;
@@ -557,7 +574,7 @@ app.get('/admin/verifications', async (req, res) => {
 app.put('/admin/verify/:id', async (req, res) => {
   const { status } = req.body; // 'verified' or 'rejected'
   try {
-    const user = await User.findOne({ id: Number(req.params.id) });
+    const user = await User.findOne(getUserQuery(req.params.id));
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     user.verificationStatus = status;

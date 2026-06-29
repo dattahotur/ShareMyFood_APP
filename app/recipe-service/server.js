@@ -73,12 +73,28 @@ app.get('/', async (req, res) => {
   }
 });
 
+const getRecipeQuery = (idParam) => {
+  if (mongoose.Types.ObjectId.isValid(idParam)) {
+    const num = Number(idParam);
+    if (!isNaN(num)) {
+      return { $or: [{ _id: idParam }, { id: num }] };
+    }
+    return { _id: idParam };
+  }
+  const numericId = Number(idParam);
+  if (!isNaN(numericId)) {
+    return { id: numericId };
+  }
+  return { id: idParam };
+};
+
 app.get('/:id', async (req, res) => {
   try {
-    const recipe = await Recipe.findOne({ id: Number(req.params.id) });
+    const recipe = await Recipe.findOne(getRecipeQuery(req.params.id));
     if (recipe) res.json(recipe);
     else res.status(404).json({ error: 'Recipe not found' });
   } catch (err) {
+    console.error('Error fetching recipe:', err);
     res.status(500).json({ error: 'Server error fetching recipe' });
   }
 });
@@ -86,7 +102,7 @@ app.get('/:id', async (req, res) => {
 app.put('/:id/decrement', async (req, res) => {
   try {
     const quantity = Number(req.body.quantity) || 1;
-    const recipe = await Recipe.findOne({ id: Number(req.params.id) });
+    const recipe = await Recipe.findOne(getRecipeQuery(req.params.id));
     if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
     
     const currentQty = Number(recipe.quantity) || 0;
@@ -106,7 +122,7 @@ app.put('/:id/decrement', async (req, res) => {
 app.put('/:id/increment', async (req, res) => {
   try {
     const quantity = Number(req.body.quantity) || 1;
-    const recipe = await Recipe.findOne({ id: Number(req.params.id) });
+    const recipe = await Recipe.findOne(getRecipeQuery(req.params.id));
     if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
     
     const currentQty = Number(recipe.quantity) || 0;
@@ -159,7 +175,7 @@ app.post('/', async (req, res) => {
 
 app.delete('/:id', async (req, res) => {
   try {
-    const result = await Recipe.deleteOne({ id: Number(req.params.id) });
+    const result = await Recipe.deleteOne(getRecipeQuery(req.params.id));
     if (result.deletedCount === 0) return res.status(404).json({ error: 'Listing not found' });
     res.json({ message: 'Listing removed' });
   } catch (err) {
