@@ -19,6 +19,7 @@ const AddRecipe = () => {
   const [dragActive, setDragActive] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [preview, setPreview] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -38,6 +39,8 @@ const AddRecipe = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+
     const isRestaurant = user.role === 'restaurant';
     const isNGO = user.role === 'ngo';
     const isVerified = user.verificationStatus === 'verified';
@@ -70,6 +73,7 @@ const AddRecipe = () => {
       availableUntil = new Date(expiryTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    setSubmitting(true);
     try {
       const res = await fetch(`${API_URL}/api/recipes/`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -86,8 +90,14 @@ const AddRecipe = () => {
       if (res.ok) {
         setNotification({ message: 'Listing created! Redirecting...', type: 'success' });
         setTimeout(() => navigate('/'), 2000);
-      } else { setNotification({ message: 'Failed to create listing.', type: 'error' }); }
-    } catch { setNotification({ message: 'Network error.', type: 'error' }); }
+      } else { 
+        setNotification({ message: 'Failed to create listing.', type: 'error' }); 
+        setSubmitting(false);
+      }
+    } catch { 
+      setNotification({ message: 'Network error.', type: 'error' }); 
+      setSubmitting(false);
+    }
   };
 
   const inputStyle = (field) => ({
@@ -264,13 +274,18 @@ const AddRecipe = () => {
             ))}
           </div>
 
-          <button type="submit" style={{
-            background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+          <button type="submit" disabled={submitting} style={{
+            background: submitting 
+              ? 'linear-gradient(135deg, #a7f3d0 0%, #a5f3fc 100%)' 
+              : 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
             color: 'white', padding: '0.9rem', borderRadius: '0.85rem',
-            fontWeight: '700', fontSize: '1.05rem', border: 'none', cursor: 'pointer',
+            fontWeight: '700', fontSize: '1.05rem', border: 'none',
+            cursor: submitting ? 'not-allowed' : 'pointer',
             marginTop: '0.5rem', fontFamily: 'inherit',
-            boxShadow: '0 8px 20px -4px rgba(16,185,129,0.35)'
-          }}>Publish Listing</button>
+            boxShadow: submitting ? 'none' : '0 8px 20px -4px rgba(16,185,129,0.35)'
+          }}>
+            {submitting ? 'Publishing...' : 'Publish Listing'}
+          </button>
         </form>
       </div>
     </div>
