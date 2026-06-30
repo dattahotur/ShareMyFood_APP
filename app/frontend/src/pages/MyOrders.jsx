@@ -122,7 +122,7 @@ const MyOrders = () => {
       // Riders are stored in the Delivery App's own user service (port 5010)
       // We call it directly since it's a separate database from ShareMyFood
       const res = await axios.post(
-        `http://localhost:5010/${order.driverId}/rider-feedback`,
+        `https://deliver-user-service.onrender.com/${order.driverId}/rider-feedback`,
         payload
       );
       
