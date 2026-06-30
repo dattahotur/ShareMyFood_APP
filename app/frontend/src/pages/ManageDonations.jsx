@@ -118,7 +118,7 @@ const ManageDonations = () => {
       };
       
       // Riders are stored in the Delivery App's own user service (port 5010)
-      const res = await axios.post(`http://localhost:5010/${order.driverId}/rider-feedback`, payload);
+      const res = await axios.post(`https://deliver-user-service.onrender.com/${order.driverId}/rider-feedback`, payload);
       
       if (res.status === 200) {
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
