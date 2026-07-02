@@ -101,18 +101,26 @@ app.use((req, res, next) => {
 });
 
 const getUserQuery = (idParam) => {
-  if (mongoose.Types.ObjectId.isValid(idParam)) {
-    const num = Number(idParam);
-    if (!isNaN(num)) {
-      return { $or: [{ _id: idParam }, { id: num }] };
-    }
-    return { _id: idParam };
+  // If it's a number, search by numeric id only.
+  if (typeof idParam === "number") {
+    return { id: idParam };
   }
-  const numericId = Number(idParam);
-  if (!isNaN(numericId)) {
-    return { id: numericId };
+
+  // Convert to string.
+  const id = String(idParam);
+
+  // If it's purely numeric, search by id.
+  if (/^\d+$/.test(id)) {
+    return { id: Number(id) };
   }
-  return { id: idParam };
+
+  // Only if it's a valid MongoDB ObjectId, search by _id.
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return { _id: id };
+  }
+
+  // Fallback.
+  return { id };
 };
 
 // Submit a warning/report resolution
