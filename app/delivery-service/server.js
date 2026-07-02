@@ -65,6 +65,7 @@ app.get('/available', async (req, res) => {
 
 // Get active delivery for a rider
 app.get('/active/:riderId', async (req, res) => {
+  console.log("ACTIVE ROUTE HIT:", req.params.riderId);
   try {
     const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-service:5001';
     try {
