@@ -151,7 +151,7 @@ app.post('/warn-rider-final', async (req, res) => {
 
     // 3. Notify
     try {
-      const notifServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5004';
+      const notifServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'https://notification-service-t1t1.onrender.com';
       await fetch(`${notifServiceUrl}/notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -521,26 +521,29 @@ app.get('/admin/stats', async (req, res) => {
   }
 });
 
-app.post('/verify', async (req, res) => {
-  const { userId, documents } = req.body;
-  try {
-    const user = await User.findOne(getUserQuery(userId));
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.status === 'deleted') {
-      return res.status(403).json({ error: 'Account has been deleted' });
-    }
+  app.post('/verify', async (req, res) => {
+    const { userId, documents } = req.body;
+    try {
+      const user = await User.findOne(getUserQuery(userId));
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (user.status === 'deleted') {
+        return res.status(403).json({ error: 'Account has been deleted' });
+      }
 
-    user.verificationStatus = 'pending';
-    user.verificationDocs = documents || [];
-    user.markModified('verificationDocs');
-    await user.save();
-    const obj = user.toObject();
-    delete obj.password;
-    res.json({ message: 'Verification requested', user: obj });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+      user.verificationStatus = 'pending';
+      user.verificationDocs = documents || [];
+      user.markModified('verificationDocs');
+      await user.save();
+      const obj = user.toObject();
+      delete obj.password;
+      res.json({ message: 'Verification requested', user: obj });
+    } catch (err) {
+  console.error('Verification Error:', err);
+  res.status(500).json({
+    error: err.message
+  });
+}
+  });
 
 app.put('/:id/verify', async (req, res) => {
   const { verificationStatus } = req.body;

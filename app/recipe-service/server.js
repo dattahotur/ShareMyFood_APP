@@ -143,7 +143,7 @@ app.post('/', async (req, res) => {
   }
 
   // Verify donor status with user-service
-  const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:5001';
+  const userServiceUrl = process.env.USER_SERVICE_URL || 'https://user-service-2fy7.onrender.com';
   try {
     const userRes = await fetch(`${userServiceUrl}/${donorId}`);
     if (userRes.status === 403 || userRes.status === 404) {
