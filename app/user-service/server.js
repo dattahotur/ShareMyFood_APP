@@ -291,9 +291,31 @@ app.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
+
+      if (existingUser) {
+
+        if (existingUser.status === "deleted") {
+          existingUser.name = name;
+          existingUser.password = password;
+          existingUser.role = role;
+          existingUser.status = "active";
+          existingUser.verificationStatus = "none";
+
+          await existingUser.save();
+
+          const obj = existingUser.toObject();
+          delete obj.password;
+
+          return res.status(201).json({
+            message: "Account reactivated",
+            user: obj
+          });
+        }
+
+  return res.status(400).json({
+    error: "Email already exists"
+  });
+}
 
     let hashedPassword = password;
     if (password) {
