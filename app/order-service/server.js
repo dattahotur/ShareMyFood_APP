@@ -172,9 +172,7 @@ app.put('/:id/resolve', async (req, res) => {
 app.post('/:id/rider-report', async (req, res) => {
   try {
 
-    const { type, reporter } = req.body; 
-    // type = "rated" or "reported"
-    // reporter = "user" or "donor"
+    const { type, reporter } = req.body;
 
     const order = await Order.findById(req.params.id);
 
@@ -185,19 +183,41 @@ app.post('/:id/rider-report', async (req, res) => {
     }
 
 
-    if (type === 'reported') {
+    // prevent duplicate user rider report
+    if (
+      type === "reported" &&
+      reporter === "user" &&
+      order.userRiderReported
+    ) {
+      return res.status(400).json({
+        error: "Rider already reported"
+      });
+    }
 
-      if (reporter === 'donor') {
 
+    // prevent duplicate donor rider report
+    if (
+      type === "reported" &&
+      reporter === "donor" &&
+      order.donorRiderReported
+    ) {
+      return res.status(400).json({
+        error: "Rider already reported"
+      });
+    }
+
+
+    if (type === "reported") {
+
+      if (reporter === "donor") {
         order.donorRiderReported = true;
-
-      } else {
-
+      } 
+      else {
         order.userRiderReported = true;
-
       }
 
-    } else {
+    } 
+    else {
 
       order.riderRated = true;
 

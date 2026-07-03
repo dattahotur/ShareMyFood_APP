@@ -137,8 +137,17 @@ const MyOrders = () => {
         );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
-        setOrders(prev => prev.map(o => (o._id === showRiderModal || o.id === showRiderModal) 
-          ? { ...o,userRiderReported: isRiderIssue,riderRated: !isRiderIssue}  : o));
+        setOrders(prev =>
+          prev.map(o =>
+            (o._id === order._id || o.id === order.id)
+              ? {
+                  ...o,
+                  userRiderReported: isRiderIssue,
+                  riderRated: !isRiderIssue
+                }
+              : o
+          )
+        );
         setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
       } else { 
         setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
