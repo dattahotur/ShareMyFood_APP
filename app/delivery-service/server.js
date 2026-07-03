@@ -149,7 +149,11 @@ app.put('/:id/status', async (req, res) => {
         driverId: delivery.riderId
       });
     } catch (err) {
-      console.error('Failed to update Order Service status:', err.message);
+      console.error(
+        "ORDER UPDATE FAILED:",
+        err.response?.status,
+        err.response?.data || err.message
+      );
     }
 
     // 3. CREDIT EARNINGS if delivered (Non-blocking)
