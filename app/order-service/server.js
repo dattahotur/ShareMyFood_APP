@@ -108,7 +108,31 @@ const checkUserStatus = async (userId) => {
     }
   }
 };
+const checkDriverStatus = async (driverId) => {
+  if (!driverId) return;
 
+  const driverServiceUrl =
+    process.env.DELIVERY_USER_SERVICE_URL;
+
+  try {
+    const res = await axios.get(`${driverServiceUrl}/${driverId}`);
+
+    if (res.data && res.data.status === "deleted") {
+      throw new Error("DELETED");
+    }
+
+  } catch (err) {
+
+    if (
+      err.message === "DELETED" ||
+      (err.response &&
+        (err.response.status === 403 ||
+         err.response.status === 404))
+    ) {
+      throw new Error("DELETED");
+    }
+  }
+};
 app.get('/health', (req, res) => res.json({ status: 'Order Service Alive' }));
 
 // Resolve a reported order
@@ -432,7 +456,7 @@ app.put('/:id/delivery-status', async (req, res) => {
     const activeDriverId = driverId || order.driverId;
     if (activeDriverId) {
       try {
-        await checkUserStatus(activeDriverId);
+        await checkDriverStatus(activeDriverId);
       } catch (err) {
         if (err.message === 'DELETED') {
           return res.status(403).json({ error: 'Unauthorized: Driver account is deleted.' });
