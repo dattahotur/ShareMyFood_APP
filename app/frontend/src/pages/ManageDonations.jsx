@@ -117,11 +117,34 @@ const ManageDonations = () => {
         orderId: order._id || order.id
       };
       
-      // Riders are stored in the Delivery App's own user service (port 5010)
-      const res = await axios.post(`https://deliver-user-service.onrender.com/${order.driverId}/rider-feedback`, payload);
-      
+     // send feedback to delivery app
+      const res = await axios.post(
+        `https://deliver-user-service.onrender.com/${order.driverId}/rider-feedback`,
+        payload
+      );
+
+
+      // update order-service report status
+      await axios.post(
+        `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
+        {
+          type: isRiderIssue ? 'reported' : 'rated',
+          reporter: 'donor'
+        }
+      );
       if (res.status === 200) {
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
+        setOrders(prev =>
+          prev.map(o =>
+            (o._id === order._id || o.id === order.id)
+              ? {
+                  ...o,
+                  donorRiderReported: isRiderIssue,
+                  riderRated: true
+                }
+              : o
+          )
+        );
         setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
       } else { 
         setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
@@ -280,7 +303,7 @@ const ManageDonations = () => {
                   }}>✕ Reject</button>
                 </div>
               )}
-              {(order.status === 'picked_up' || order.status === 'completed') && order.deliveryMethod === 'delivery-partner' && (
+              {(order.status === 'picked_up' || order.status === 'completed') && order.deliveryMethod === 'delivery-partner'&& !order.donorRiderReported && !order.riderRated && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                   <button 
                     onClick={() => setShowRiderModal(order._id || order.id)}

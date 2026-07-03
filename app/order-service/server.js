@@ -84,9 +84,28 @@ const orderSchema = new mongoose.Schema({
   pickupAddress: String,
   dropoffAddress: String,
   dropoffPhone: String,
-  foodReported: { type: Boolean, default: false },
-  riderReported: { type: Boolean, default: false },
-  riderRated: { type: Boolean, default: false },
+  // customer reports food
+  foodReported: { 
+    type: Boolean, 
+    default: false 
+  },
+
+  // customer reports rider
+  userRiderReported: { 
+    type: Boolean, 
+    default: false 
+  },
+
+  // donor reports rider
+  donorRiderReported: { 
+    type: Boolean, 
+    default: false 
+  },
+
+  riderRated: { 
+    type: Boolean, 
+    default: false 
+  },
   paymentMethod: { type: String, default: 'COD' },
   deliveryMethod: { type: String, enum: ['self-pickup', 'delivery-partner'], default: 'self-pickup' },
   timestamp: { type: Date, default: Date.now }
@@ -152,20 +171,54 @@ app.put('/:id/resolve', async (req, res) => {
 // Mark rider as rated or reported for an order
 app.post('/:id/rider-report', async (req, res) => {
   try {
-    const { type } = req.body; // 'rated' or 'reported'
+
+    const { type, reporter } = req.body; 
+    // type = "rated" or "reported"
+    // reporter = "user" or "donor"
+
     const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    
-    if (type === 'reported') {
-      order.riderReported = true;
-    } else {
-      order.riderRated = true;
+
+    if (!order) {
+      return res.status(404).json({
+        error: 'Order not found'
+      });
     }
-    
+
+
+    if (type === 'reported') {
+
+      if (reporter === 'donor') {
+
+        order.donorRiderReported = true;
+
+      } else {
+
+        order.userRiderReported = true;
+
+      }
+
+    } else {
+
+      order.riderRated = true;
+
+    }
+
+
     await order.save();
-    res.json({ message: `Rider ${type} status updated`, order });
+
+
+    res.json({
+      message: `Rider ${type} status updated`,
+      order
+    });
+
+
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update rider status' });
+
+    res.status(500).json({
+      error: 'Failed to update rider status'
+    });
+
   }
 });
 
@@ -202,49 +255,77 @@ app.get('/donor/:donorId', async (req, res) => {
   }
 });
 
-// Report an order
+// Report food order
 app.post('/:id/report', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    
-    order.status = 'reported';
+
+    if (!order) {
+      return res.status(404).json({ 
+        error: 'Order not found' 
+      });
+    }
+
+    // only mark food report
     order.foodReported = true;
+
+    // DON'T change completed status
+    // order.status = 'reported';  ❌ remove
+
     order.reportReason = req.body.reason || 'No reason provided';
     order.reportProof = req.body.proof || '';
     order.reportProofImage = req.body.proofImage || '';
+
     await order.save();
 
-    // Update donor report count in user-service
+
+    // update donor reports
     try {
       const userServiceUrl = process.env.USER_SERVICE_URL;
-      console.log("USER_SERVICE_URL =", userServiceUrl);
-      console.log("DONOR_ID =", order.donorId);
+
       await axios.put(
         `${userServiceUrl}/${order.donorId}/report`
       );
-      console.log("REPORT COUNT UPDATED");
+
+      console.log("DONOR REPORT COUNT UPDATED");
+
     } catch (err) {
       console.error(
-        "Failed to update donor report count:",
+        "Failed donor report:",
         err.response?.data || err.message
       );
     }
 
-    // Notify donor about the report
+
+    // notify donor
     try {
-      const notificationServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:5004';
+
+      const notificationServiceUrl =
+        process.env.NOTIFICATION_SERVICE_URL 
+        || 'http://notification-service:5004';
+
       axios.post(`${notificationServiceUrl}/notify`, {
         userId: order.donorId,
-        message: `Your listing for record #${order.recipeId} has been reported.`,
-        type: 'ORDER_REPORTED',
+        message: `Your food item has been reported.`,
+        type: 'FOOD_REPORTED',
         relatedId: order._id
-      }).catch(e => console.error("Notification failed:", e.message));
-    } catch (err) {}
+      });
 
-    res.json({ message: 'Order reported successfully', order });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to report order' });
+    } catch(err){}
+
+
+    res.json({
+      message:'Food reported successfully',
+      order
+    });
+
+
+  } catch(error){
+
+    res.status(500).json({
+      error:'Failed to report food'
+    });
+
   }
 });
 
@@ -264,22 +345,40 @@ app.put('/:id/resolve', async (req, res) => {
 });
 
 // Get reported orders for admin
+// Get reported food orders
 app.get('/admin/reported', async (req, res) => {
   try {
-    const reports = await Order.find({ status: 'reported' }).sort({ timestamp: -1 });
+    const reports = await Order.find({
+      foodReported: true
+    }).sort({
+      timestamp: -1
+    });
+
     res.json(reports);
+
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch reports' });
+    res.status(500).json({
+      error: 'Failed to fetch reports'
+    });
   }
 });
+
 
 // Get all reported orders
 app.get('/admin/reports', async (req, res) => {
   try {
-    const reports = await Order.find({ status: 'reported' }).sort({ timestamp: -1 });
+    const reports = await Order.find({
+      foodReported: true
+    }).sort({
+      timestamp: -1
+    });
+
     res.json(reports);
+
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch reports' });
+    res.status(500).json({
+      error: 'Failed to fetch reports'
+    });
   }
 });
 

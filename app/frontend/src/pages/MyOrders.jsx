@@ -93,7 +93,7 @@ const MyOrders = () => {
       });
       if (res.ok) {
         setNotification({ message: 'Report submitted successfully.', type: 'success' });
-        setOrders(prev => prev.map(o => (o._id === showReportModal || o.id === showReportModal) ? { ...o, status: 'reported', foodReported: true } : o));
+        setOrders(prev => prev.map(o => (o._id === showReportModal || o.id === showReportModal) ? { ...o,foodReported: true } : o));
         setShowReportModal(null); setReportImage(''); setReportDescription('');
       } else { setNotification({ message: 'Failed to submit report.', type: 'error' }); }
     } catch { setNotification({ message: 'Network error.', type: 'error' }); }
@@ -129,15 +129,16 @@ const MyOrders = () => {
       if (res.status === 200) {
         // Mark as reported/rated in order service too
         await axios.post(
-          `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
-          {
-            type: isRiderIssue ? 'reported' : 'rated'
-          }
+        `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
+        {
+          type: isRiderIssue ? 'reported' : 'rated',
+          reporter: 'user'
+        }
         );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
         setOrders(prev => prev.map(o => (o._id === showRiderModal || o.id === showRiderModal) 
-          ? { ...o, riderReported: isRiderIssue, riderRated: !isRiderIssue } : o));
+          ? { ...o,userRiderReported: isRiderIssue,riderRated: !isRiderIssue}  : o));
         setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
       } else { 
         setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
@@ -215,8 +216,8 @@ const MyOrders = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {orders.length > 0 ? orders.map((order, i) => {
           const recipe = recipes[order.recipeId];
-          const isFoodReported = order.foodReported || order.status === 'reported' || order.status === 'resolved';
-          const isRiderReported = order.riderReported === true;
+          const isFoodReported = order.foodReported === true;
+          const isRiderReported = order.userRiderReported === true;
           const isRiderRated = order.riderRated === true;
           const riderFeedbackGiven = isRiderReported || isRiderRated;
 
