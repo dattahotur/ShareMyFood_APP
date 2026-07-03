@@ -440,11 +440,24 @@ app.put('/:id/delivery-status', async (req, res) => {
       }
     }
     
-    // Robust check for driver permission
-    if (order.driverId && driverId && String(order.driverId) !== String(driverId)) {
-      console.warn(`[AUTH-MISMATCH] Order Driver: ${order.driverId}, Request Driver: ${driverId}`);
-      // Only block if both exist and are different.
-      return res.status(403).json({ error: 'Unauthorized to update this delivery' });
+    // Assign driver if not already assigned
+    if (!order.driverId && driverId) {
+      order.driverId = driverId;
+    }
+
+    // Prevent different rider updating after assignment
+    if (
+      order.driverId &&
+      driverId &&
+      String(order.driverId) !== String(driverId)
+    ) {
+      console.warn(
+        `[AUTH-MISMATCH] Order Driver: ${order.driverId}, Request Driver: ${driverId}`
+      );
+
+      return res.status(403).json({
+        error: "Unauthorized to update this delivery"
+      });
     }
 
     order.deliveryStatus = status;
