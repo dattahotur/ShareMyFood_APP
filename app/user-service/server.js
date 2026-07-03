@@ -273,17 +273,33 @@ app.get('/admin/all', async (req, res) => {
   }
 });
 
-app.get('/:id', async (req, res) => {
+app.get('/:id', async (req,res)=>{
   try {
+
     const user = await User.findOne(getUserQuery(req.params.id));
-    if (user) {
-      const obj = user.toObject();
-      delete obj.password;
-      return res.json(obj);
+
+    if(!user){
+      return res.status(404).json({
+        error:"User not found"
+      });
     }
-    res.status(404).json({ error: 'User not found' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+
+    const obj = user.toObject();
+
+    delete obj.password;
+
+    // don't send huge base64 docs
+    delete obj.verificationDocs;
+
+    res.json(obj);
+
+
+  }catch(err){
+
+    res.status(500).json({
+      error:"Server error"
+    });
+
   }
 });
 
