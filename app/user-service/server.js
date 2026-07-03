@@ -290,66 +290,47 @@ app.get('/:id', async (req, res) => {
 app.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // check if email already exists
     const existingUser = await User.findOne({ email });
 
-      if (existingUser) {
-
-        if (existingUser.status === "deleted") {
-          existingUser.name = name;
-          existingUser.password = password;
-          existingUser.role = role;
-          existingUser.status = "active";
-          existingUser.verificationStatus = "none";
-
-          await existingUser.save();
-
-          const obj = existingUser.toObject();
-          delete obj.password;
-
-          return res.status(201).json({
-            message: "Account reactivated",
-            user: obj
-          });
-        }
-
-  return res.status(400).json({
-    error: "Email already exists"
-  });
-}
+    if (existingUser) {
+      return res.status(400).json({
+        error: "Email already exists"
+      });
+    }
 
     let hashedPassword = password;
+
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    const maxUser = await User.findOne().sort({ id: -1 });
-    const newId = maxUser ? maxUser.id + 1 : 1;
-
     const newUser = new User({
-      id: newId,
+      id: Date.now(),
       ...req.body,
       password: hashedPassword,
-      reportCount: 0,
       status: "active",
       verificationStatus: "none",
-      verificationDocs: [],
-      verificationAttempts: 0,
-      isOnline: false,
-      vehicleType: "",
-      vehicleNumber: "",
-      availableEarnings: 0,
-      ratings: [],
-      reports: [],
-      warnings: []
+      verificationDocs: []
     });
 
     await newUser.save();
+
     const obj = newUser.toObject();
     delete obj.password;
-    res.status(201).json({ message: 'User registered', user: obj });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: obj
+    });
+
   } catch (err) {
-    console.error('Registration error:', err);
-    res.status(500).json({ error: 'Server error during registration' });
+    console.error("Register error:", err);
+
+    res.status(500).json({
+      error: "Server error"
+    });
   }
 });
 
@@ -506,14 +487,38 @@ app.get('/:id/withdrawals', async (req, res) => {
 app.delete('/:id', async (req, res) => {
   try {
     const user = await User.findOne(getUserQuery(req.params.id));
-    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'User not found' 
+      });
+    }
+
+    // Soft delete account
     user.status = 'deleted';
+
+    // Release email so user can register again
+    user.email = `deleted_${Date.now()}_${user.email}`;
+
+    // Disable old password login
+    user.password = `deleted_${Date.now()}`;
+
     await user.save();
+
     const obj = user.toObject();
     delete obj.password;
-    res.json({ message: 'User account deleted', user: obj });
+
+    res.json({
+      message: 'User account deleted',
+      user: obj
+    });
+
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error("Delete user error:", err);
+
+    res.status(500).json({
+      error: 'Server error'
+    });
   }
 });
 
