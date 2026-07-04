@@ -130,20 +130,19 @@ const MyOrders = () => {
         await axios.post(
           `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
           {
-            type: isRiderIssue ? 'reported' : 'rated',
+            type: 'reported',
             reporter: 'user'
           }
         );
 
 
-        // update UI immediately
         setOrders(prev =>
           prev.map(o =>
             (o._id === order._id || o.id === order.id)
               ? {
                   ...o,
-                  userRiderReported: isRiderIssue,
-                  riderRated: !isRiderIssue
+                  userRiderReported: true,
+                  riderRated: false
                 }
               : o
           )
