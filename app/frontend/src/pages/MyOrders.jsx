@@ -149,13 +149,13 @@ const MyOrders = () => {
         );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
-        setOrders(prev =>
+      setOrders(prev =>
           prev.map(o =>
             (o._id === order._id || o.id === order.id)
               ? {
                   ...o,
-                  userRiderReported: isRiderIssue,
-                  riderRated: !isRiderIssue
+                  userRiderReported: true,
+                  riderRated: false
                 }
               : o
           )

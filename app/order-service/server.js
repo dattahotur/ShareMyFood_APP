@@ -168,58 +168,44 @@ app.put('/:id/resolve', async (req, res) => {
   }
 });
 
-// Mark rider as rated or reported for an order
+// Mark rider feedback completed for an order
 app.post('/:id/rider-report', async (req, res) => {
   try {
 
-    const { type, reporter } = req.body;
+    const { reporter } = req.body;
 
     const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({
-        error: 'Order not found'
+        error: "Order not found"
       });
     }
 
 
-    // prevent duplicate user rider report
-    if (
-      type === "reported" &&
-      reporter === "user" &&
-      order.userRiderReported
-    ) {
-      return res.status(400).json({
-        error: "Rider already reported"
+    // USER already submitted
+    if (reporter === "user" && order.userRiderReported === true) {
+      return res.status(409).json({
+        error: "User already submitted rider feedback"
       });
     }
 
 
-    // prevent duplicate donor rider report
-    if (
-      type === "reported" &&
-      reporter === "donor" &&
-      order.donorRiderReported
-    ) {
-      return res.status(400).json({
-        error: "Rider already reported"
+    // DONOR already submitted
+    if (reporter === "donor" && order.donorRiderReported === true) {
+      return res.status(409).json({
+        error: "Donor already submitted rider feedback"
       });
     }
 
 
-    if (type === "reported") {
+    if (reporter === "donor") {
 
-      if (reporter === "donor") {
-        order.donorRiderReported = true;
-      } 
-      else {
-        order.userRiderReported = true;
-      }
+      order.donorRiderReported = true;
 
-    } 
-    else {
+    } else {
 
-      order.riderRated = true;
+      order.userRiderReported = true;
 
     }
 
@@ -228,15 +214,15 @@ app.post('/:id/rider-report', async (req, res) => {
 
 
     res.json({
-      message: `Rider ${type} status updated`,
+      message: "Rider feedback completed",
       order
     });
 
 
-  } catch (error) {
+  } catch (err) {
 
     res.status(500).json({
-      error: 'Failed to update rider status'
+      error:"Failed to update rider feedback"
     });
 
   }
