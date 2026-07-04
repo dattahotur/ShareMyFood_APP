@@ -130,36 +130,22 @@ const MyOrders = () => {
         await axios.post(
           `${API_URL}/api/orders/${order._id || order.id}/rider-report`,
           {
-            type: 'reported',
             reporter: 'user'
           }
         );
-
 
         setOrders(prev =>
           prev.map(o =>
             (o._id === order._id || o.id === order.id)
               ? {
                   ...o,
-                  userRiderReported: true,
-                  riderRated: false
+                  userRiderReported: true
                 }
               : o
           )
         );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
-      setOrders(prev =>
-          prev.map(o =>
-            (o._id === order._id || o.id === order.id)
-              ? {
-                  ...o,
-                  userRiderReported: true,
-                  riderRated: false
-                }
-              : o
-          )
-        );
         setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
       } else { 
         setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
@@ -312,17 +298,17 @@ const MyOrders = () => {
                   )}
                   {order.status === 'completed' && order.deliveryMethod === 'delivery-partner' && (
                     <button 
-                      onClick={() => !riderFeedbackGiven && setShowRiderModal(order._id || order.id)}
-                      disabled={riderFeedbackGiven}
+                      onClick={() => !isRiderReported && setShowRiderModal(order._id || order.id)}
+                      disabled={isRiderReported}
                       style={{
                         padding: '0.4rem 0.8rem', borderRadius: '0.6rem', border: 'none',
-                        background: riderFeedbackGiven ? 'rgba(59,130,246,0.03)' : 'rgba(59,130,246,0.08)', 
-                        color: riderFeedbackGiven ? '#94a3b8' : '#3b82f6', 
+                        background: isRiderReported ? 'rgba(59,130,246,0.03)' : 'rgba(59,130,246,0.08)', 
+                        color: isRiderReported ? '#94a3b8' : '#3b82f6', 
                         fontWeight: '700',
-                        fontSize: '0.75rem', cursor: riderFeedbackGiven ? 'default' : 'pointer', fontFamily: 'inherit'
+                        fontSize: '0.75rem', cursor: isRiderReported ? 'default' : 'pointer', fontFamily: 'inherit'
                       }}
                     >
-                      {isRiderReported ? 'Rider Reported' : (isRiderRated ? 'Rider Rated' : 'Rate/Report Rider')}
+                      {isRiderReported ? 'Rider Reported' : 'Rate/Report Rider'}
                     </button>
                   )}
                 </div>
