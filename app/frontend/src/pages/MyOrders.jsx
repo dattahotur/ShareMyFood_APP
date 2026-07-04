@@ -146,6 +146,10 @@ const MyOrders = () => {
         );
         
         setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
+<<<<<<< HEAD
+=======
+     
+>>>>>>> 68d4530 (Fix user rider feedback state update)
         setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
       } else { 
         setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
