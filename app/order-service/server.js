@@ -183,16 +183,28 @@ app.post('/:id/rider-report', async (req, res) => {
     }
 
 
-    // USER already submitted
+    console.log("BEFORE CHECK:", {
+      orderId: order._id,
+      reporter,
+      userRiderReported: order.userRiderReported,
+      donorRiderReported: order.donorRiderReported
+    });
+
+
     if (reporter === "user" && order.userRiderReported === true) {
+
+      console.log("BLOCKED USER DUPLICATE");
+
       return res.status(409).json({
         error: "User already submitted rider feedback"
       });
     }
 
 
-    // DONOR already submitted
     if (reporter === "donor" && order.donorRiderReported === true) {
+
+      console.log("BLOCKED DONOR DUPLICATE");
+
       return res.status(409).json({
         error: "Donor already submitted rider feedback"
       });
@@ -200,17 +212,19 @@ app.post('/:id/rider-report', async (req, res) => {
 
 
     if (reporter === "donor") {
-
       order.donorRiderReported = true;
-
     } else {
-
       order.userRiderReported = true;
-
     }
 
 
     await order.save();
+
+
+    console.log("AFTER SAVE:", {
+      userRiderReported: order.userRiderReported,
+      donorRiderReported: order.donorRiderReported
+    });
 
 
     res.json({
@@ -220,6 +234,8 @@ app.post('/:id/rider-report', async (req, res) => {
 
 
   } catch (err) {
+
+    console.log(err);
 
     res.status(500).json({
       error:"Failed to update rider feedback"
