@@ -172,7 +172,11 @@ app.put('/:id/resolve', async (req, res) => {
 app.post('/:id/rider-report', async (req, res) => {
   try {
 
-    const { reporter } = req.body;
+    let { reporter } = req.body;
+
+    if (!reporter) {
+      reporter = "user";
+    }
 
     const order = await Order.findById(req.params.id);
 
