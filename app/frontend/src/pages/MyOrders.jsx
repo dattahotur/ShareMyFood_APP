@@ -144,21 +144,43 @@ const MyOrders = () => {
               : o
           )
         );
-        
-        setNotification({ message: 'Feedback submitted successfully.', type: 'success' });
-<<<<<<< HEAD
-=======
-     
->>>>>>> 68d4530 (Fix user rider feedback state update)
-        setShowRiderModal(null); setRiderRating(5); setRiderFeedback(''); setRiderImage(''); setIsRiderIssue(false);
-      } else { 
-        setNotification({ message: 'Failed to submit feedback.', type: 'error' }); 
-      }
-    } catch (err) { 
-      console.error("Feedback error:", err.response?.data || err.message);
-      setNotification({ message: err.response?.data?.error || 'Failed to submit feedback.', type: 'error' }); 
-    }
-    finally { setIsSubmittingRider(false); }
+
+        setNotification({ 
+          message: 'Feedback submitted successfully.', 
+          type: 'success' 
+        });
+
+        setShowRiderModal(null); 
+        setRiderRating(5); 
+        setRiderFeedback(''); 
+        setRiderImage(''); 
+        setIsRiderIssue(false);
+
+        } else { 
+
+          setNotification({ 
+            message: 'Failed to submit feedback.', 
+            type: 'error' 
+          }); 
+
+        }
+
+        } catch (err) { 
+
+        console.error(
+          "Feedback error:",
+          err.response?.data || err.message
+        );
+
+        setNotification({ 
+          message: err.response?.data?.error || 'Failed to submit feedback.',
+          type: 'error' 
+        }); 
+
+        }
+        finally { 
+          setIsSubmittingRider(false); 
+        }
   };
 
   const handleFileChange = (e, target) => {
