@@ -35,13 +35,20 @@ const AuthChecker = () => {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/users/${userId}`);
         if (res.status === 403 || res.status === 404) {
-          handleForceLogout();
+          let msg = 'Your account has been removed by an administrator.';
+          try {
+            const errData = await res.json();
+            if (errData.error) msg = errData.error;
+          } catch (e) {}
+          handleForceLogout(msg);
           return;
         }
         if (res.ok) {
           const latestUser = await res.json();
           if (latestUser.status === 'deleted') {
-            handleForceLogout();
+            handleForceLogout('Your account has been removed by an administrator.');
+          } else if (latestUser.status === 'restricted') {
+            handleForceLogout('Your account has been restricted. Contact admin.');
           }
         }
       } catch (err) {
@@ -49,10 +56,10 @@ const AuthChecker = () => {
       }
     };
 
-    const handleForceLogout = () => {
+    const handleForceLogout = (msg) => {
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('auth-change'));
-      navigate('/login', { state: { message: 'Your account has been removed by an administrator.' } });
+      navigate('/login', { state: { message: msg || 'Your account has been removed by an administrator.' } });
     };
 
     checkUserStatus();

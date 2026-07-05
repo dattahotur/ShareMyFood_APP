@@ -284,6 +284,12 @@ app.get('/:id', async (req,res)=>{
       });
     }
 
+    if (user.status === 'restricted') {
+      return res.status(403).json({
+        error: "Your account has been restricted. Contact admin."
+      });
+    }
+
     const obj = user.toObject();
 
     delete obj.password;
@@ -384,6 +390,9 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email, status: { $ne: 'deleted' } });
     if (user) {
+      if (user.status === 'restricted') {
+        return res.status(403).json({ error: 'Your account has been restricted. Contact admin.' });
+      }
       let isMatch = false;
       try {
         isMatch = await bcrypt.compare(password, user.password);
@@ -535,6 +544,21 @@ app.delete('/:id', async (req, res) => {
     res.status(500).json({
       error: 'Server error'
     });
+  }
+});
+
+app.put('/:id/restrict', async (req, res) => {
+  try {
+    const user = await User.findOne(getUserQuery(req.params.id));
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.status = 'restricted';
+    await user.save();
+    const obj = user.toObject();
+    delete obj.password;
+    res.json({ message: 'User account restricted', user: obj });
+  } catch (err) {
+    console.error("Restrict user error:", err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

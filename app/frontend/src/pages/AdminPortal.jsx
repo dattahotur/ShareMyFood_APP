@@ -99,7 +99,7 @@ const AdminPortal = () => {
     
     try {
       if (type === 'restrict') {
-        fetch(`${API_URL}/api/users/${donorId}`, { method: 'DELETE' }); // Background fire-and-forget
+        fetch(`${API_URL}/api/users/${donorId}/restrict`, { method: 'PUT' }); // Background fire-and-forget
       } else {
         const donor = users.find(u => String(u.id || u._id) === String(donorId));
                 await fetch(`${API_URL}/api/users/warn-rider-final`, {
@@ -168,7 +168,7 @@ const AdminPortal = () => {
 
     try {
       if (donorId) {
-        await fetch(`${API_URL}/api/users/${donorId}`, { method: 'DELETE' });
+        await fetch(`${API_URL}/api/users/${donorId}/restrict`, { method: 'PUT' });
       }
       await fetch(`${API_URL}/api/orders/${rId}/resolve`, { method: 'PUT' });
       setNotification({ message: 'Donor restricted and report resolved.', type: 'success' });
@@ -464,7 +464,7 @@ const AdminPortal = () => {
             </div>
             <h3 style={{ margin: '0 0 0.5rem', fontFamily: "'Outfit', sans-serif", fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>Confirm Account Restriction</h3>
             <p style={{ color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5, fontSize: '0.92rem' }}>
-              Are you sure you want to permanently delete this account and resolve this report? This action cannot be undone.
+              Are you sure you want to restrict this account?
             </p>
             
             <div style={{ display: 'flex', gap: '0.75rem' }}>
