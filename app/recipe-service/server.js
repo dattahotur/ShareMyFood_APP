@@ -36,6 +36,8 @@ const recipeSchema = new mongoose.Schema({
   address: { type: String, default: '' },
   allowedRoles: { type: [String], default: ['user', 'ngo'] }
 }, { strict: false });
+recipeSchema.index({ id: 1 });
+recipeSchema.index({ donorId: 1 });
 
 const Recipe = mongoose.model('Recipe', recipeSchema);
 
@@ -68,14 +70,14 @@ app.get('/', async (req, res) => {
   try {
 
     const recipes = await Recipe.find({})
-      .select(
-        "-reportProof -proofImage -verificationDocs"
-      )
+      .limit(50)
       .lean();
 
     res.json(recipes);
 
   } catch (err) {
+
+    console.error(err);
 
     res.status(500).json({
       error: 'Server error fetching recipes'
