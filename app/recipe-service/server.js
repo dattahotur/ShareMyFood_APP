@@ -66,10 +66,21 @@ app.get('/health', (req, res) => res.json({ status: 'Recipe Service Alive' }));
 
 app.get('/', async (req, res) => {
   try {
-    const recipes = await Recipe.find({});
+
+    const recipes = await Recipe.find({})
+      .select(
+        "-reportProof -proofImage -verificationDocs"
+      )
+      .lean();
+
     res.json(recipes);
+
   } catch (err) {
-    res.status(500).json({ error: 'Server error fetching recipes' });
+
+    res.status(500).json({
+      error: 'Server error fetching recipes'
+    });
+
   }
 });
 
