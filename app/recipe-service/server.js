@@ -101,12 +101,32 @@ const getRecipeQuery = (idParam) => {
 
 app.get('/:id', async (req, res) => {
   try {
-    const recipe = await Recipe.findOne(getRecipeQuery(req.params.id));
-    if (recipe) res.json(recipe);
-    else res.status(404).json({ error: 'Recipe not found' });
+
+    // block browser favicon request
+    if (req.params.id === "favicon.ico") {
+      return res.status(204).end();
+    }
+
+    const recipe = await Recipe.findOne(
+      getRecipeQuery(req.params.id)
+    );
+
+    if (!recipe) {
+      return res.status(404).json({
+        error: "Recipe not found"
+      });
+    }
+
+    res.json(recipe);
+
   } catch (err) {
-    console.error('Error fetching recipe:', err);
-    res.status(500).json({ error: 'Server error fetching recipe' });
+
+    console.error("Error fetching recipe:", err);
+
+    res.status(500).json({
+      error: "Server error fetching recipe"
+    });
+
   }
 });
 
