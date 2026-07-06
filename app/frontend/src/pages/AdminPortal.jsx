@@ -34,7 +34,7 @@ const AdminPortal = () => {
         const ordData = await ordRes.json();
         const usrData = await usrRes.json();
         const recData = await recRes.json();
-        setReports(ordData.filter(o => o.status === 'reported'));
+        setReports(ordData.filter(o => o.foodReported === true && o.status !== 'resolved'));
         setAllOrders(ordData);
         setUsers(usrData);
         setRecipes(recData);
