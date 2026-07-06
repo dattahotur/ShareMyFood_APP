@@ -832,7 +832,7 @@ app.post('/', async (req, res) => {
     // Fetch recipe details to get the pickup address
     let pickupAddress = '';
     try {
-      const recipeServiceUrl = 'https://recipe-service-1g2k.onrender.com';
+      const recipeServiceUrl = process.env.RECIPE_SERVICE_URL || 'https://recipe-service-1g2k.onrender.com';
       const recipeRes = await axios.get(`${recipeServiceUrl}/${recipeId}`);
       pickupAddress = recipeRes.data.address || '';
       

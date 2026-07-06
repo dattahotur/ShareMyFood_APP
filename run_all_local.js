@@ -19,6 +19,7 @@ const SERVICES = [
     args: ['server.js'],
     env: {
       PORT: '5002',
+      USER_SERVICE_URL: 'http://localhost:5001'
     }
   },
   {
