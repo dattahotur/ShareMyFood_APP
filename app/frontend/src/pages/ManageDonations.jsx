@@ -139,8 +139,7 @@ const ManageDonations = () => {
             (o._id === order._id || o.id === order.id)
               ? {
                   ...o,
-                  donorRiderReported: isRiderIssue,
-                  riderRated: true
+                  donorRiderReported: true
                 }
               : o
           )
@@ -193,6 +192,7 @@ const ManageDonations = () => {
           const orderRecipeId = order.recipeId;
           const recipe = recipes[orderRecipeId];
           const isPending = order.status === 'pending';
+          const isRiderReported = order.donorRiderReported === true;
           return (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
@@ -303,17 +303,20 @@ const ManageDonations = () => {
                   }}>✕ Reject</button>
                 </div>
               )}
-              {(order.status === 'picked_up' || order.status === 'completed') && order.deliveryMethod === 'delivery-partner'&& !order.donorRiderReported && !order.riderRated && (
+              {(order.status === 'picked_up' || order.status === 'completed') && order.deliveryMethod === 'delivery-partner' && (!order.riderRated || isRiderReported) && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                   <button 
-                    onClick={() => setShowRiderModal(order._id || order.id)}
+                    onClick={() => !isRiderReported && setShowRiderModal(order._id || order.id)}
+                    disabled={isRiderReported}
                     style={{
                       padding: '0.4rem 0.8rem', borderRadius: '0.6rem', border: 'none',
-                      background: 'rgba(59,130,246,0.08)', color: '#3b82f6', fontWeight: '700',
-                      fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'inherit'
+                      background: isRiderReported ? 'rgba(59,130,246,0.03)' : 'rgba(59,130,246,0.08)', 
+                      color: isRiderReported ? '#94a3b8' : '#3b82f6', 
+                      fontWeight: '700',
+                      fontSize: '0.75rem', cursor: isRiderReported ? 'default' : 'pointer', fontFamily: 'inherit'
                     }}
                   >
-                    Rate/Report Rider
+                    {isRiderReported ? 'Rider Reported' : 'Rate/Report Rider'}
                   </button>
                 </div>
               )}
