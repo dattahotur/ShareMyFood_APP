@@ -199,13 +199,9 @@ const Home = () => {
                     <div className="card-badge-container">
                       {/* Left side badges */}
                       <div className="card-badge-column-left">
-                        <div className="card-badge card-badge-location">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width:'12px',height:'12px'}}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                          </svg>
-                          {recipe.distance || '0.5 km'}
-                        </div>
+                        {recipe.quantity === 0 && (
+                          <div className="card-badge card-badge-stock">OUT OF STOCK</div>
+                        )}
                         {isFreeSoon && (
                           <div className="card-badge card-badge-free">FREE FOR NGOs SOON</div>
                         )}
@@ -213,9 +209,6 @@ const Home = () => {
 
                       {/* Right side badges */}
                       <div className="card-badge-column-right">
-                        {recipe.quantity === 0 && (
-                          <div className="card-badge card-badge-stock">OUT OF STOCK</div>
-                        )}
                         {recipe.allowedRoles && recipe.allowedRoles.length === 1 && recipe.allowedRoles[0] === 'ngo' && (
                           <div className="card-badge card-badge-ngo">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width:'12px',height:'12px'}}>
@@ -223,6 +216,9 @@ const Home = () => {
                             </svg>
                             NGO ONLY
                           </div>
+                        )}
+                        {recipe.isNGOPreferred && (
+                          <div className="card-badge card-badge-preferred">NGO PREFERRED</div>
                         )}
                       </div>
                     </div>
@@ -249,9 +245,6 @@ const Home = () => {
                       {recipe.donorVerified && <VerifiedBadge size="16px" />}
                       {recipe.category && (
                         <span style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', color: '#475569', borderRadius: '4px', padding: '1px 6px', fontSize: '0.65rem', fontWeight: '800', border: '1px solid #e2e8f0', textTransform: 'uppercase' }}>{recipe.category}</span>
-                      )}
-                      {recipe.isNGOPreferred && (
-                        <span style={{ display:'flex', alignItems:'center', background:'#f5f3ff', color:'#7c3aed', borderRadius:'4px', padding:'1px 6px', fontSize:'0.65rem', fontWeight:'800', border:'1px solid #ddd6fe' }}>NGO PREFERRED</span>
                       )}
                     </div>
                     

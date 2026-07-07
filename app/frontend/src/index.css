@@ -888,17 +888,6 @@ button:active {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.card-badge-location {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  color: #0f172a;
-  padding: 0.35rem 0.65rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
 .card-badge-stock {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
@@ -910,6 +899,12 @@ button:active {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.card-badge-preferred {
+  background: linear-gradient(135deg, #f5f3ff, #e9d5ff);
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
 }
 
 .card-badge-free {
