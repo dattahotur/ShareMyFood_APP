@@ -825,3 +825,105 @@ button:active {
   white-space: nowrap;
 }
 
+/* ═══════════════════════════════════════════
+   RESPONSIVE FOOD CARD & GRID STYLES
+   ═══════════════════════════════════════════ */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .food-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .food-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .food-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+.card-badge-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.card-badge-column-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.card-badge-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.card-badge {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.6rem;
+  font-size: 0.73rem;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-badge-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  color: #0f172a;
+  padding: 0.35rem 0.65rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-badge-stock {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.card-badge-ngo {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-badge-free {
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@media (max-width: 380px) {
+  .card-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
+    border-radius: 0.45rem;
+  }
+}
+
+

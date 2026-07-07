@@ -137,7 +137,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem', opacity: recipes.length === 0 ? 0.5 : 1 }}>
+        <div className="food-grid" style={{ opacity: recipes.length === 0 ? 0.5 : 1 }}>
           {(() => {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
             const filteredRecipes = recipes.filter(r => {
@@ -183,45 +183,68 @@ const Home = () => {
                     border: '1px solid rgba(255,255,255,0.6)',
                     boxShadow: '0 4px 16px -4px rgba(0,0,0,0.06)',
                     textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column',
-                    animation: `fadeInUp 0.5s ease-out ${Math.min(idx * 0.08, 0.4)}s forwards`, opacity: 0
+                    animation: `fadeInUp 0.5s ease-out ${Math.min(idx * 0.08, 0.4)}s forwards`, opacity: 0,
+                    maxWidth: '100%', boxSizing: 'border-box'
                   }}>
-                  {/* Image */}
+                  {/* Image wrapper */}
                   <div style={{ height: '200px', position: 'relative', overflow: 'hidden' }}>
                     <img src={recipe.image || `https://images.unsplash.com/photo-${recipe.id % 2 === 0 ? '1546069901-ba9599a7e63c' : '1567623481151-1cfad0929a4a'}?w=500&auto=format&fit=crop&q=80`}
                       alt={recipe.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                       onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'; }} />
+                    
                     {/* Gradient overlay on bottom */}
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(transparent, rgba(0,0,0,0.3))' }} />
-                    {/* Location badge */}
-                    <div style={{
-                      position: 'absolute', top: '12px', left: '12px',
-                      display: 'flex', alignItems: 'center', gap: '4px',
-                      background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)',
-                      padding: '0.35rem 0.65rem', borderRadius: '0.6rem',
-                      fontSize: '0.73rem', fontWeight: '800', color: '#0f172a'
-                    }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width:'12px',height:'12px'}}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                      </svg>
-                      {recipe.distance || '0.5 km'}
+                    
+                    {/* Responsive Badges Container */}
+                    <div className="card-badge-container">
+                      {/* Left side badges */}
+                      <div className="card-badge-column-left">
+                        <div className="card-badge card-badge-location">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width:'12px',height:'12px'}}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                          </svg>
+                          {recipe.distance || '0.5 km'}
+                        </div>
+                        {isFreeSoon && (
+                          <div className="card-badge card-badge-free">FREE FOR NGOs SOON</div>
+                        )}
+                      </div>
+
+                      {/* Right side badges */}
+                      <div className="card-badge-column-right">
+                        {recipe.quantity === 0 && (
+                          <div className="card-badge card-badge-stock">OUT OF STOCK</div>
+                        )}
+                        {recipe.allowedRoles && recipe.allowedRoles.length === 1 && recipe.allowedRoles[0] === 'ngo' && (
+                          <div className="card-badge card-badge-ngo">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width:'12px',height:'12px'}}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                            </svg>
+                            NGO ONLY
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {/* Status badges */}
-                    {recipe.quantity === 0 && (
-                      <div style={{ position:'absolute', top:'12px', right:'12px', background:'linear-gradient(135deg, #ef4444, #dc2626)', color:'white', padding:'0.35rem 0.7rem', borderRadius:'0.6rem', fontSize:'0.73rem', fontWeight:'800' }}>OUT OF STOCK</div>
-                    )}
-                    {recipe.allowedRoles && recipe.allowedRoles.length === 1 && recipe.allowedRoles[0] === 'ngo' && (
-                      <div style={{ position:'absolute', top:'12px', right:'12px', background:'linear-gradient(135deg, #7c3aed, #6d28d9)', color:'white', padding:'0.35rem 0.7rem', borderRadius:'0.6rem', fontSize:'0.73rem', fontWeight:'800', display:'flex', alignItems:'center', gap:'4px' }}>NGO ONLY</div>
-                    )}
-                    {isFreeSoon && (
-                      <div style={{ position:'absolute', top:'12px', left:'12px', marginTop:'32px', background:'linear-gradient(135deg, #7c3aed, #8b5cf6)', color:'white', padding:'0.35rem 0.7rem', borderRadius:'0.6rem', fontSize:'0.73rem', fontWeight:'800', animation:'pulse 2s infinite' }}>FREE FOR NGOs SOON</div>
-                    )}
                   </div>
 
                   {/* Content */}
                   <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.4rem', opacity: recipe.quantity === 0 ? 0.6 : 1 }}>
-                    <h4 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: '700', color: '#0f172a', fontSize: '1.05rem' }}>{recipe.title}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontFamily: "'Outfit', sans-serif",
+                      fontWeight: '700',
+                      color: '#0f172a',
+                      fontSize: '1.05rem',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      overflowWrap: 'anywhere'
+                    }}>{recipe.title}</h4>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', width: '100%' }}>
                       <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>{recipe.restaurant}</p>
                       {recipe.donorVerified && <VerifiedBadge size="16px" />}
                       {recipe.category && (
@@ -231,9 +254,10 @@ const Home = () => {
                         <span style={{ display:'flex', alignItems:'center', background:'#f5f3ff', color:'#7c3aed', borderRadius:'4px', padding:'1px 6px', fontSize:'0.65rem', fontWeight:'800', border:'1px solid #ddd6fe' }}>NGO PREFERRED</span>
                       )}
                     </div>
+                    
                     <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>Available until {recipe.availableUntil}</p>
                     {recipe.address && (
-                      <p style={{ margin: '0.1rem 0 0', fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ margin: '0.1rem 0 0', fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
                         📍 {recipe.address}
                       </p>
                     )}
@@ -259,15 +283,15 @@ const Home = () => {
                     )}
 
                     {/* Footer */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
-                      <span style={{ fontWeight: '800', fontSize: '1.2rem', color: '#0f172a', display: 'flex', gap: '0.4rem', alignItems: 'baseline' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ fontWeight: '800', fontSize: '1.2rem', color: '#0f172a', display: 'flex', gap: '0.4rem', alignItems: 'baseline', flexShrink: 0 }}>
                         ₹{parseFloat(recipe.discountPrice || recipe.price || 0).toFixed(2)}
                         {recipe.originalPrice && <del style={{ marginLeft: '2px', color: '#94a3b8', fontSize: '0.85rem' }}>₹{parseFloat(recipe.originalPrice).toFixed(2)}</del>}
                       </span>
                       <span style={{
                         background: 'linear-gradient(135deg, #10b981, #06b6d4)',
                         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                        fontWeight: '700', fontSize: '0.85rem'
+                        fontWeight: '700', fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0
                       }}>View Details →</span>
                     </div>
                   </div>
