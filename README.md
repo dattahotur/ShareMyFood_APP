@@ -223,3 +223,5 @@ The runner script will boot all systems, direct their logs to `local_logs/`, and
 
 **Gargeya Datta Hotur** - *Full Stack Developer*
 * **GitHub**: [@dattahotur](https://github.com/dattahotur)
+* **LinkedIn**: [Gargeya Datta Hotur](https://www.linkedin.com/in/gargeya-datta-hotur-7ab80a322)
+* **Email**: dattahotur369@gmail.com
