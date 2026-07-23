@@ -1,0 +1,20 @@
+[
+  {
+    "id": 99,
+    "name": "Admin",
+    "email": "admin@gmail.com",
+    "password": "admin",
+    "role": "admin",
+    "status": "active",
+    "verificationStatus": "verified",
+    "verificationDocs": [],
+    "verificationAttempts": 0,
+    "isOnline": false,
+    "vehicleType": "",
+    "vehicleNumber": "",
+    "availableEarnings": 0,
+    "ratings": [],
+    "reports": [],
+    "warnings": []
+  }
+]

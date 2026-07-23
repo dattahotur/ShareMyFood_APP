@@ -1,6 +1,0 @@
-user-service:-https://user-service-2fy7.onrender.com
-recipe-service:-https://recipe-service-1g2k.onrender.com
-notification-service:-https://notification-service-t1t1.onrender.com
-order-service:-https://order-service-19ng.onrender.com
-delivery-service:-https://delivery-service-5hnr.onrender.com
-api-gateway:-https://api-gateway-g0a8.onrender.com
